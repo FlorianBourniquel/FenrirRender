@@ -2,6 +2,7 @@ package sample.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class AntiPatternInstance {
@@ -24,4 +25,5 @@ public class AntiPatternInstance {
     public Map<String, String> getData() {
         return data;
     }
+
 }

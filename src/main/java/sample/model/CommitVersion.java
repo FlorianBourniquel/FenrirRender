@@ -2,10 +2,7 @@ package sample.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CommitVersion {
 
@@ -43,5 +40,28 @@ public class CommitVersion {
 
     public Map<String, List<AntiPatternInstance>> getAntiPatterns() {
         return antiPatterns;
+    }
+
+    public Map<String, Map<String,Integer>> calculateOccurenceInSameClass(){
+        List<String> alreadyProcessed = new LinkedList<>();
+        Map<String, Map<String,Integer>> map = new HashMap<>();
+        for (Map.Entry<String, List<AntiPatternInstance>> entry : antiPatterns.entrySet())
+        {
+            alreadyProcessed.add(entry.getKey());
+            map.put(entry.getKey(),new HashMap<>());
+            for (Map.Entry<String, List<AntiPatternInstance>> entryTmp : antiPatterns.entrySet()) {
+                if (!alreadyProcessed.contains(entryTmp.getKey())){
+                    for (AntiPatternInstance ap: entry.getValue()) {
+                        Integer classOccurrence = 0;
+                        for (AntiPatternInstance apSub: entryTmp.getValue()) {
+                            if (ap.getLocation().isSameClass(apSub.getLocation()))
+                                classOccurrence++;
+                        }
+                        map.get(entry.getKey()).put(entryTmp.getKey(),classOccurrence);
+                    }
+                }
+            }
+        }
+        return map;
     }
 }

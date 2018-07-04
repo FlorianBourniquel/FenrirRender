@@ -30,4 +30,8 @@ public class Location {
     public String getLineLocation() {
         return lineLocation;
     }
+
+    public boolean isSameClass(Location location) {
+        return location.getClassLocation().equals(classLocation);
+    }
 }
