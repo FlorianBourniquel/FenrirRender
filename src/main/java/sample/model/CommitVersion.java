@@ -45,10 +45,12 @@ public class CommitVersion {
     public Map<String, Map<String,Integer>> calculateOccurenceInSameClass(){
         List<String> alreadyProcessed = new LinkedList<>();
         Map<String, Map<String,Integer>> map = new HashMap<>();
+        for (Map.Entry<String, List<AntiPatternInstance>> entry : antiPatterns.entrySet()) {
+            map.put(entry.getKey(),new HashMap<>());
+        }
         for (Map.Entry<String, List<AntiPatternInstance>> entry : antiPatterns.entrySet())
         {
-            alreadyProcessed.add(entry.getKey());
-            map.put(entry.getKey(),new HashMap<>());
+
             for (Map.Entry<String, List<AntiPatternInstance>> entryTmp : antiPatterns.entrySet()) {
                 if (!alreadyProcessed.contains(entryTmp.getKey())){
                     for (AntiPatternInstance ap: entry.getValue()) {
@@ -57,10 +59,17 @@ public class CommitVersion {
                             if (ap.getLocation().isSameClass(apSub.getLocation()))
                                 classOccurrence++;
                         }
+                        if (entry.getKey().equals(entryTmp.getKey())) {
+                            map.get(entry.getKey()).put(entryTmp.getKey(),classOccurrence - 1);
+                        }
+                        else {
                         map.get(entry.getKey()).put(entryTmp.getKey(),classOccurrence);
+                        map.get(entryTmp.getKey()).put(entry.getKey(),classOccurrence);
+                        }
                     }
                 }
             }
+            alreadyProcessed.add(entry.getKey());
         }
         return map;
     }
