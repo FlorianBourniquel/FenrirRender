@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<GridPane id="girdPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane id="girdPane" fx:id="girdPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="33.0" prefWidth="100.0" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="67.0" prefWidth="100.0" />
@@ -40,13 +40,17 @@
                         <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="382.0" prefWidth="198.0" text="AP Name :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
                         <Label text="Occurrences :" GridPane.rowIndex="2" />
                         <Label alignment="TOP_LEFT" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Location :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS" />
-                        <Label id="APName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label id="aPName" fx:id="aPName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="DataSet :" />
-                        <Label id="Occurrences" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label id="occurrences" fx:id="occurrences" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <ChoiceBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
-                        <ScrollPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                        <ScrollPane fitToHeight="true" fitToWidth="true" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
                            <content>
-                              <ListView id="avb" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" />
+                              <VBox id="locations" fx:id="locations">
+                                 <children>
+                                    <ListView maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                                 </children>
+                              </VBox>
                            </content>
                         </ScrollPane>
                      </children>
@@ -55,6 +59,6 @@
             </HBox>
          </children>
       </VBox>
-      <StackPane id="pane" prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" />
+      <StackPane id="stackPane" fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" />
    </children>
 </GridPane>
