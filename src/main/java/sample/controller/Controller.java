@@ -7,11 +7,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -194,26 +194,19 @@ public class Controller implements Initializable, ViewerListener {
                     locations.getChildren().clear();
                     aPName.setText(edge.getId());
                     occurrences.setText(String.valueOf(classOccurrence.get(pairAPName).size()));
-                    VBox vBox = new VBox();
                     for (Map.Entry<String, List<PairAPNameLocation>> entry : classOccurrence.get(pairAPName).entrySet()) {
                         TitledPane titledPane = new TitledPane();
                         titledPane.setText(entry.getKey());
-                        ListView listView = new ListView();
-                        ObservableList data = FXCollections.observableArrayList();
+                        VBox vBox = new VBox();
                         for (PairAPNameLocation apNameLocation: entry.getValue()) {
-                            data.add( apNameLocation.getName() + " in " + apNameLocation.getLocation().toString());
+                            Text text = new Text();
+                            text.setText(apNameLocation.getName() + " in " + apNameLocation.getLocation().toString());
+                            vBox.getChildren().add(text);
                         }
-                        listView.setItems(data);
-                        listView.setPrefHeight(data.size() * 24 + 2);
-                        VBox.setVgrow(listView, Priority.ALWAYS);
-                        titledPane.setContent(listView);
-                        vBox.getChildren().add(titledPane);
+                        titledPane.setContent(vBox);
                         titledPane.setExpanded(true);
+                        locations.getChildren().add(titledPane);
                     }
-                    ScrollPane scrollPane = new ScrollPane(vBox);
-                    VBox.setVgrow(scrollPane, Priority.ALWAYS);
-                    scrollPane.setMaxHeight(Double.MAX_VALUE);
-                    locations.getChildren().add(scrollPane);
                 }
         );
 
