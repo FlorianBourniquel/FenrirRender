@@ -4,54 +4,23 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.gephi.graph.api.*;
-import org.gephi.preview.api.*;
-import org.gephi.preview.types.DependantOriginalColor;
-import org.gephi.preview.types.EdgeColor;
-import org.gephi.project.api.ProjectController;
-import org.gephi.project.api.Workspace;
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Graph;
-
-import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.ui.fx_viewer.FxDefaultView;
-import org.graphstream.ui.fx_viewer.FxViewPanel;
-import org.graphstream.ui.fx_viewer.FxViewer;
-import org.graphstream.ui.fx_viewer.util.FxMouseManager;
-import org.graphstream.ui.javafx.FxGraphRenderer;
-import org.graphstream.ui.view.ViewerListener;
-import org.graphstream.ui.view.ViewerPipe;
-import org.graphstream.ui.view.util.InteractiveElement;
-import org.openide.util.Lookup;
 import sample.controller.Controller;
-import sample.model.AntiPatternInstance;
 import sample.model.CommitVersion;
-import sample.utils.PreviewSketch;
 import sample.utils.TimestampDeserializer;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.*;
+import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
-
-import static java.lang.Thread.sleep;
+import java.util.Objects;
 
 public class Main extends Application {
 
