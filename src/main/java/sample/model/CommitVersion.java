@@ -2,8 +2,10 @@ package sample.model;
 
 import com.google.gson.annotations.SerializedName;
 import com.sun.tools.javac.util.Pair;
+import sample.utils.MyPredicate;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class CommitVersion {
 
@@ -66,7 +68,7 @@ public class CommitVersion {
         return antiPatterns;
     }
 
-    public Map<PairAPName, Map<String,List<PairAPNameLocation>>> calculateOccurrenceInSameClass(){
+    public Map<PairAPName, Map<String,List<PairAPNameLocation>>> calculateOccurrenceInSameClass(MyPredicate predicate){
         List<PairAPName> alreadyProcessed = new LinkedList<>();
         Map<PairAPName, Map<String,List<PairAPNameLocation>>> map = new HashMap<>();
 
@@ -88,7 +90,7 @@ public class CommitVersion {
                                     map.get(pairAPName).get(ap.getLocation().getClassLocation()).add(new PairAPNameLocation(entry.getKey(),ap.getLocation()));
                                 continue myLabel;
                             }
-                            if (ap.getLocation().isSameClass(apSub.getLocation())) {
+                            if (predicate.testLocation(ap.getLocation(),apSub.getLocation())) {
                                 apNameLocations.add(new PairAPNameLocation(entryTmp.getKey(), apSub.getLocation()));
                             }
                         }
@@ -116,4 +118,5 @@ public class CommitVersion {
         }
         pairLocationOccurrences.add(new PairLocationOccurrence(location));
     }
+
 }

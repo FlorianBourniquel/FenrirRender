@@ -7,10 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -27,10 +24,8 @@ import org.graphstream.ui.layout.springbox.implementations.LinLog;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 import org.graphstream.ui.view.util.InteractiveElement;
-import sample.model.AntiPatternInstance;
-import sample.model.CommitVersion;
-import sample.model.PairAPName;
-import sample.model.PairAPNameLocation;
+import sample.model.*;
+import sample.utils.MyPredicate;
 
 import java.net.URL;
 import java.util.*;
@@ -49,12 +44,25 @@ public class Controller implements Initializable, ViewerListener {
 
     private Map<String, Map<String, Integer>> apLocationAndOccurrences = new HashMap<>();
 
-    private Map<String, FxDefaultView> graphsAlreadyCreated = new HashMap<>();
+    private Map<String, Map<String,FxDefaultView>> graphsAlreadyCreated = new HashMap<>();
+
+    private Map<String, MyPredicate> predicateMap = new HashMap<>();
 
     private CommitVersion currentCommitVersion;
 
+    private ToggleGroup group = new ToggleGroup();
+
     @FXML
     private Label aPName;
+
+    @FXML
+    private RadioButton classScopeButton;
+
+    @FXML
+    private RadioButton functionScopeButton;
+
+    @FXML
+    private RadioButton lineScopeButton;
 
     @FXML
     private ChoiceBox commitVersionChoice;
@@ -76,33 +84,49 @@ public class Controller implements Initializable, ViewerListener {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        classScopeButton.setToggleGroup(group);
+        functionScopeButton.setToggleGroup(group);
+        lineScopeButton.setToggleGroup(group);
+        classScopeButton.setSelected(true);
         setChoiceBoxDataSet();
-        createGraphForCommitVersion(commitVersions.get(0).getName());
-        commitVersionChoice.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                createGraphForCommitVersion(String.valueOf(commitVersionChoice.getItems().get((Integer) number2)));
+        predicateMap.put("Class", Location::isSameClass);
+        predicateMap.put("Function", Location::isSameClassAndFunction);
+        predicateMap.put("Line", Location::isSame);
+        createGraphForCommitVersion();
+        commitVersionChoice.getSelectionModel().selectedIndexProperty().addListener((observableValue, number, number2)
+                -> createGraphForCommitVersion(String.valueOf(commitVersionChoice.getItems().get((Integer) number2))));
+        group.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
+            if (group.getSelectedToggle() != null) {
+                createGraphForCommitVersion();
             }
         });
 
     }
 
-    private void createGraphForCommitVersion(String name) {
+    private void createGraphForCommitVersion(String... args) {
+        String commitVersionName;
+        if (args.length > 0)
+             commitVersionName = args[0];
+        else
+            commitVersionName = String.valueOf(commitVersionChoice.getValue());
+        String scope = String.valueOf(((RadioButton) group.getSelectedToggle()).getText());
         clearCurrentGraph();
         stackPane.getChildren().clear();
-        if (graphsAlreadyCreated.get(name) != null) {
-            stackPane.getChildren().add(graphsAlreadyCreated.get(name));
+        if (graphsAlreadyCreated.get(commitVersionName) != null && graphsAlreadyCreated.get(commitVersionName).get(scope) != null) {
+            currentGraph = graphsAlreadyCreated.get(commitVersionName).get(scope).getViewer().getGraphicGraph();
+            stackPane.getChildren().add(graphsAlreadyCreated.get(commitVersionName).get(scope));
         }
         else {
             for (CommitVersion commitVersionLoop : commitVersions) {
-                if (commitVersionLoop.getName().equals(name)) {
+                if (commitVersionLoop.getName().equals(commitVersionName)) {
                     currentCommitVersion = commitVersionLoop;
                     break;
                 }
 
             }
-            currentGraph = new SingleGraph(currentCommitVersion.getName());
-            classOccurrence = currentCommitVersion.calculateOccurrenceInSameClass();
+            currentGraph = new SingleGraph(currentCommitVersion.getName() + "-" + scope);
+            classOccurrence = currentCommitVersion.calculateOccurrenceInSameClass(predicateMap.get(scope));
             currentGraph.removeAttribute("ui.stylesheet");
             currentGraph.setAttribute("ui.antialias");
             currentGraph.setAttribute("ui.quality");
@@ -123,7 +147,27 @@ public class Controller implements Initializable, ViewerListener {
             for (Map.Entry<PairAPName, Map<String, List<PairAPNameLocation>>> entry : classOccurrence.entrySet()) {
                 if (entry.getValue().size() > 0) {
                     Edge edge = currentGraph.addEdge(entry.getKey().getName1() + "-" + entry.getKey().getName2(), entry.getKey().getName1(), entry.getKey().getName2(), false);
-                    edge.setAttribute("ui.style", "size: " + entry.getValue().size() + "px;");
+                    edge.setAttribute("ui.style", "size: " + 4 + "px;");
+                    if (entry.getValue().size() < 5) {
+                        edge.setAttribute("ui.style", "fill-color: #729ea1;");
+                        edge.setAttribute("color", "fill-color: #729ea1;");
+                    }
+                    else if (entry.getValue().size() >= 5 && entry.getValue().size() <10) {
+                        edge.setAttribute("ui.style", "fill-color: #b5bd89;");
+                        edge.setAttribute("color", "fill-color: #b5bd89;");
+                    }
+                    else if (entry.getValue().size() >= 10 && entry.getValue().size() <15) {
+                        edge.setAttribute("ui.style", "fill-color: #dfbe99;");
+                        edge.setAttribute("color", "fill-color: #dfbe99;");
+                    }
+                    else if (entry.getValue().size() >= 15 && entry.getValue().size() <20) {
+                        edge.setAttribute("ui.style", "fill-color: #ec9192;");
+                        edge.setAttribute("color", "fill-color: #ec9192;");
+                    }
+                    else {
+                        edge.setAttribute("ui.style", "fill-color: #db5375;");
+                        edge.setAttribute("color", "fill-color: #db5375;");
+                    }
                 }
             }
 
@@ -135,7 +179,14 @@ public class Controller implements Initializable, ViewerListener {
             pipeIn.addViewerListener(this);
             pipeIn.pump();
 
-            graphsAlreadyCreated.put(currentCommitVersion.getName(), view);
+            if (graphsAlreadyCreated.containsKey(currentCommitVersion.getName())) {
+                graphsAlreadyCreated.get(currentCommitVersion.getName()).put(scope, view);
+            }
+            else {
+                HashMap<String, FxDefaultView> hashMap = new HashMap<>();
+                hashMap.put(scope,view);
+                graphsAlreadyCreated.put(currentCommitVersion.getName(),hashMap);
+            }
             stackPane.getChildren().add(view);
 
             new Thread(() -> {
@@ -162,7 +213,7 @@ public class Controller implements Initializable, ViewerListener {
     private void setChoiceBoxDataSet() {
         ObservableList data = FXCollections.observableArrayList();
         for (CommitVersion commitVersion:commitVersions) {
-            graphsAlreadyCreated.put(commitVersion.getName(),null);
+            graphsAlreadyCreated.put(commitVersion.getName(),new HashMap<>());
             data.add(commitVersion.getName());
         }
         commitVersionChoice.setItems(data);
@@ -203,7 +254,7 @@ public class Controller implements Initializable, ViewerListener {
     }
 
     private void selectNode(Node node) {
-        node.setAttribute("ui.style", "fill-color: red;");
+        node.setAttribute("ui.style", "fill-color: #9d54ea;");
         node.setAttribute("selected", "true;");
         selectedNodes.add(node);
         if (selectedNodes.size() == 3) {
@@ -253,7 +304,7 @@ public class Controller implements Initializable, ViewerListener {
                             vBox.getChildren().add(text);
                         }
                         titledPane.setContent(vBox);
-                        titledPane.setExpanded(true);
+                        titledPane.setExpanded(false);
                         locations.getChildren().add(titledPane);
                     }
                 }
@@ -268,7 +319,7 @@ public class Controller implements Initializable, ViewerListener {
         else
             edge = currentGraph.getEdge(node1.getId() + "-" + node.getId());
         if (edge != null) {
-            edge.setAttribute("ui.style", "fill-color: green;");
+            edge.setAttribute("ui.style", "fill-color: #372248;");
             fillInfo(edge);
         } else
             fillInfo(node1);
@@ -281,7 +332,7 @@ public class Controller implements Initializable, ViewerListener {
         else
             edge = currentGraph.getEdge(node1.getId() + "-" + node.getId());
         if (edge != null) {
-            edge.setAttribute("ui.style", "fill-color: black;");
+            edge.setAttribute("ui.style", edge.getAttribute("color"));
         }
     }
 }

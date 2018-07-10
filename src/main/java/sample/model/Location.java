@@ -33,8 +33,16 @@ public class Location {
         return lineLocation;
     }
 
-    public boolean isSameClass(Location location) {
-        return location.getClassLocation().equals(classLocation);
+    public static boolean isSameClass(Location location, Location location2) {
+        return location.getClassLocation().equals(location2.getClassLocation());
+    }
+
+    public static boolean isSameClassAndFunction(Location location, Location location2) {
+        return isSameClass(location,location2) && location.getFunctionLocation().equals(location2.getFunctionLocation());
+    }
+
+    public static boolean isSame(Location location, Location location2) {
+        return isSameClassAndFunction(location,location2) && location.getLineLocation().equals(location2.getLineLocation());
     }
 
     @Override
