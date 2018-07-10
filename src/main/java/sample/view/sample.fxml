@@ -2,7 +2,6 @@
 
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -43,7 +42,7 @@
                         <Label id="aPName" fx:id="aPName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="DataSet :" />
                         <Label id="occurrences" fx:id="occurrences" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <ChoiceBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+                        <ChoiceBox id="commitVersionChoice" fx:id="commitVersionChoice" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
                         <ScrollPane fitToHeight="true" fitToWidth="true" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
                            <content>
                               <VBox id="locations" fx:id="locations">
