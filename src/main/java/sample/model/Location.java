@@ -38,11 +38,11 @@ public class Location {
     }
 
     public static boolean isSameClassAndFunction(Location location, Location location2) {
-        return isSameClass(location,location2) && location.getFunctionLocation().equals(location2.getFunctionLocation());
+        return isSameClass(location,location2) && !location.getFunctionLocation().equals("") && !location2.getFunctionLocation().equals("") && location.getFunctionLocation().equals(location2.getFunctionLocation());
     }
 
     public static boolean isSame(Location location, Location location2) {
-        return isSameClassAndFunction(location,location2) && location.getLineLocation().equals(location2.getLineLocation());
+        return isSameClassAndFunction(location,location2) && !location.getLineLocation().equals("") && !location2.getLineLocation().equals("") && location.getLineLocation().equals(location2.getLineLocation());
     }
 
     @Override

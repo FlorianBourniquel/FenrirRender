@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -32,6 +31,7 @@
                             </columnConstraints>
                             <rowConstraints>
                                 <RowConstraints minHeight="10.0" percentHeight="3.0" prefHeight="30.0" vgrow="ALWAYS" />
+                        <RowConstraints minHeight="10.0" percentHeight="3.0" prefHeight="30.0" vgrow="ALWAYS" />
                                 <RowConstraints minHeight="10.0" percentHeight="3.0" prefHeight="30.0" vgrow="ALWAYS" />
                                 <RowConstraints minHeight="10.0" percentHeight="3.0" prefHeight="30.0" vgrow="ALWAYS" />
                                 <RowConstraints minHeight="10.0" percentHeight="3.0" prefHeight="30.0" vgrow="ALWAYS" />
@@ -39,14 +39,14 @@
                                 <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" vgrow="ALWAYS" />
                             </rowConstraints>
                             <children>
-                                <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="382.0" prefWidth="198.0" text="AP Name :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
-                                <Label text="Occurrences :" GridPane.rowIndex="3" />
-                                <Label alignment="TOP_LEFT" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Location :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.vgrow="ALWAYS" />
-                                <Label id="aPName" fx:id="aPName" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="382.0" prefWidth="198.0" text="AP Name :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS" />
+                                <Label text="Occurrences :" GridPane.rowIndex="4" />
+                                <Label alignment="TOP_LEFT" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Location :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5" GridPane.vgrow="ALWAYS" />
+                                <Label id="aPName" fx:id="aPName" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                 <Label text="DataSet :" />
-                                <Label id="occurrences" fx:id="occurrences" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                <Label id="occurrences" fx:id="occurrences" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                 <ChoiceBox id="commitVersionChoice" fx:id="commitVersionChoice" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
-                                <ScrollPane fitToHeight="true" fitToWidth="true" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.vgrow="ALWAYS">
+                                <ScrollPane fitToHeight="true" fitToWidth="true" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5" GridPane.vgrow="ALWAYS">
                                     <content>
                                         <VBox id="locations" fx:id="locations">
                                             <children>
@@ -54,14 +54,16 @@
                                         </VBox>
                                     </content>
                                 </ScrollPane>
-                                <Label text="Scope :" GridPane.rowIndex="1" />
-                                <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+                                <Label text="Scope :" GridPane.rowIndex="2" />
+                                <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                                     <children>
-                                        <RadioButton id="classScopeButton" fx:id="classScopeButton" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Class" textAlignment="CENTER" HBox.hgrow="ALWAYS"/>
-                                        <RadioButton id="functionScopeButton" fx:id="functionScopeButton" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Function"  HBox.hgrow="ALWAYS"/>
-                                        <RadioButton id="lineScopeButton" fx:id="lineScopeButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Line" HBox.hgrow="ALWAYS"/>
+                                        <RadioButton id="classScopeButton" fx:id="classScopeButton" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Class" textAlignment="CENTER" HBox.hgrow="ALWAYS" />
+                                        <RadioButton id="functionScopeButton" fx:id="functionScopeButton" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Function" HBox.hgrow="ALWAYS" />
+                                        <RadioButton id="lineScopeButton" fx:id="lineScopeButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Line" HBox.hgrow="ALWAYS" />
                                     </children>
                                 </HBox>
+                        <Label text="AP activated :" GridPane.rowIndex="1" />
+                        <HBox id="apActivatedHbox" fx:id="apActivatedHbox" alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
                             </children>
                         </GridPane>
                     </children>

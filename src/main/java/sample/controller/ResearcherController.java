@@ -1,13 +1,13 @@
 package sample.controller;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -40,17 +40,23 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private List<CommitVersion> commitVersions;
 
-    private Map<PairAPName, Map<String, List<PairAPNameLocation>>> classOccurrence;
+    private Map<PairAPName, Map<String, List<PairAPNameLocation>>> apOccurrence;
 
     private Map<String, Map<String, Integer>> apLocationAndOccurrences = new HashMap<>();
 
-    private Map<String, Map<String,FxDefaultView>> graphsAlreadyCreated = new HashMap<>();
+
+
+    private Map<String, Map<String, List<Boolean>>> statusAPSelected = new HashMap<>();
+
+    private Map<String, Map<String, Map<PairAPName, Map<String, List<PairAPNameLocation>>>>> occurrenceAlreadyCalculated = new HashMap<>();
 
     private Map<String, MyPredicate> predicateMap = new HashMap<>();
 
     private CommitVersion currentCommitVersion;
 
     private ToggleGroup group = new ToggleGroup();
+
+    private String previousScope = "Class";
 
     @FXML
     private Label aPName;
@@ -74,9 +80,14 @@ public class ResearcherController implements Initializable, ViewerListener {
     private VBox locations;
 
     @FXML
+    private HBox apActivatedHbox;
+
+    @FXML
     private Label occurrences;
 
     private List<Node> selectedNodes = new LinkedList<>();
+
+    private Boolean block = false;
 
     public ResearcherController(List<CommitVersion> commitVersions) {
         this.commitVersions = commitVersions;
@@ -90,121 +101,186 @@ public class ResearcherController implements Initializable, ViewerListener {
         lineScopeButton.setToggleGroup(group);
         classScopeButton.setSelected(true);
         setChoiceBoxDataSet();
+        fillHasMap();
         predicateMap.put("Class", Location::isSameClass);
         predicateMap.put("Function", Location::isSameClassAndFunction);
         predicateMap.put("Line", Location::isSame);
         createGraphForCommitVersion();
-        commitVersionChoice.getSelectionModel().selectedIndexProperty().addListener((observableValue, number, number2)
-                -> createGraphForCommitVersion(String.valueOf(commitVersionChoice.getItems().get((Integer) number2))));
+        commitVersionChoice.getSelectionModel().selectedIndexProperty().addListener((observableValue, number, number2) -> {
+            previousScope = String.valueOf(((RadioButton) group.getSelectedToggle()).getText());
+            createGraphForCommitVersion(String.valueOf(commitVersionChoice.getItems().get((Integer) number2)));
+        });
         group.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
             if (group.getSelectedToggle() != null) {
+                previousScope = String.valueOf(((RadioButton) old_toggle).getText());
                 createGraphForCommitVersion();
             }
         });
 
     }
 
-    private void createGraphForCommitVersion(String... args) {
-        String commitVersionName;
-        if (args.length > 0)
-             commitVersionName = args[0];
-        else
-            commitVersionName = String.valueOf(commitVersionChoice.getValue());
-        String scope = String.valueOf(((RadioButton) group.getSelectedToggle()).getText());
-        clearCurrentGraph();
-        stackPane.getChildren().clear();
-        if (graphsAlreadyCreated.get(commitVersionName) != null && graphsAlreadyCreated.get(commitVersionName).get(scope) != null) {
-            currentGraph = graphsAlreadyCreated.get(commitVersionName).get(scope).getViewer().getGraphicGraph();
-            stackPane.getChildren().add(graphsAlreadyCreated.get(commitVersionName).get(scope));
-        }
-        else {
-            for (CommitVersion commitVersionLoop : commitVersions) {
-                if (commitVersionLoop.getName().equals(commitVersionName)) {
-                    currentCommitVersion = commitVersionLoop;
-                    break;
-                }
-
-            }
-            currentGraph = new SingleGraph(currentCommitVersion.getName() + "-" + scope);
-            classOccurrence = currentCommitVersion.calculateOccurrenceInSameClass(predicateMap.get(scope));
-            currentGraph.removeAttribute("ui.stylesheet");
-            currentGraph.setAttribute("ui.antialias");
-            currentGraph.setAttribute("ui.quality");
-
-            FxViewer viewer = new FxViewer(currentGraph, FxViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
-            viewer.enableAutoLayout(new LinLog());
-
-            for (Map.Entry<String, List<AntiPatternInstance>> entry : currentCommitVersion.getAntiPatterns().entrySet()) {
-                if (entry.getValue().size() > 0)
-                    currentGraph.addNode(entry.getKey());
-            }
-            for (Node node : currentGraph) {
-                node.setAttribute("ui.label", node.getId());
-                node.setAttribute("ui.style", "text-size: 15px; text-alignment: under; text-color: white; text-style: bold; text-background-mode: rounded-box; text-background-color: #222C; text-padding: 5px, 4px; text-offset: 0px, 5px;");
-
-            }
-
-            for (Map.Entry<PairAPName, Map<String, List<PairAPNameLocation>>> entry : classOccurrence.entrySet()) {
-                if (entry.getValue().size() > 0) {
-                    Edge edge = currentGraph.addEdge(entry.getKey().getName1() + "-" + entry.getKey().getName2(), entry.getKey().getName1(), entry.getKey().getName2(), false);
-                    edge.setAttribute("ui.style", "size: " + 4 + "px;");
-                    if (entry.getValue().size() < 5) {
-                        edge.setAttribute("ui.style", "fill-color: #729ea1;");
-                        edge.setAttribute("color", "fill-color: #729ea1;");
-                    }
-                    else if (entry.getValue().size() >= 5 && entry.getValue().size() <10) {
-                        edge.setAttribute("ui.style", "fill-color: #b5bd89;");
-                        edge.setAttribute("color", "fill-color: #b5bd89;");
-                    }
-                    else if (entry.getValue().size() >= 10 && entry.getValue().size() <15) {
-                        edge.setAttribute("ui.style", "fill-color: #dfbe99;");
-                        edge.setAttribute("color", "fill-color: #dfbe99;");
-                    }
-                    else if (entry.getValue().size() >= 15 && entry.getValue().size() <20) {
-                        edge.setAttribute("ui.style", "fill-color: #ec9192;");
-                        edge.setAttribute("color", "fill-color: #ec9192;");
-                    }
-                    else {
-                        edge.setAttribute("ui.style", "fill-color: #db5375;");
-                        edge.setAttribute("color", "fill-color: #db5375;");
+    private void setAPActivatedHboxDataSet() {
+        apActivatedHbox.getChildren().clear();
+        for (Map.Entry<String, List<AntiPatternInstance>> entry : currentCommitVersion.getAntiPatterns().entrySet()) {
+            RadioButton radioButton = new RadioButton();
+            radioButton.setText(entry.getKey());
+            HBox.setHgrow(radioButton, Priority.ALWAYS);
+            radioButton.setAlignment(Pos.CENTER);
+            radioButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            radioButton.setSelected(true);
+            radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
+                if (!block) {
+                    if (isNowSelected) {
+                        addAPToGraph(radioButton.getText());
+                    } else {
+                        removeAPToGraph(radioButton.getText());
                     }
                 }
-            }
-
-            //currentGraph.setAttribute("ui.stylesheet", styleSheet);
-            FxDefaultView view = (FxDefaultView) viewer.addView("view1", new FxGraphRenderer());
-            view.setMouseManager(new FxMouseManager(EnumSet.of(InteractiveElement.EDGE, InteractiveElement.NODE, InteractiveElement.SPRITE)));
-            ViewerPipe pipeIn = viewer.newViewerPipe();
-            pipeIn.addAttributeSink(currentGraph);
-            pipeIn.addViewerListener(this);
-            pipeIn.pump();
-
-            if (graphsAlreadyCreated.containsKey(currentCommitVersion.getName())) {
-                graphsAlreadyCreated.get(currentCommitVersion.getName()).put(scope, view);
-            }
-            else {
-                HashMap<String, FxDefaultView> hashMap = new HashMap<>();
-                hashMap.put(scope,view);
-                graphsAlreadyCreated.put(currentCommitVersion.getName(),hashMap);
-            }
-            stackPane.getChildren().add(view);
-
-            new Thread(() -> {
-                while (loop) {
-                    pipeIn.pump();
-                    try {
-                        sleep(40);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
+            });
+            apActivatedHbox.getChildren().add(radioButton);
         }
     }
 
-    private void clearCurrentGraph() {
-        if (currentGraph!=null) {
-            for (Node node:selectedNodes) {
+    private void removeAPToGraph(String text) {
+        for (int i = 0; i < currentGraph.getEdgeCount(); i++) {
+            if (currentGraph.getEdge(i).getNode0().getId().equals(text) || currentGraph.getEdge(i).getNode1().getId().equals(text)) {
+                unselectEdge(currentGraph.getEdge(i).getNode0(),currentGraph.getEdge(i).getNode1());
+                currentGraph.removeEdge(i);
+            }
+        }
+        unselectNode(currentGraph.getNode(text));
+        currentGraph.removeNode(text);
+    }
+
+    private void addAPToGraph(String text) {
+        currentGraph.addNode(text);
+        setCssToNode();
+        createEdge(occurrenceAlreadyCalculated.get(currentCommitVersion.getName()).get(String.valueOf(((RadioButton) group.getSelectedToggle()).getText())), text);
+    }
+
+    private void createGraphForCommitVersion(String... args) {
+        String commitVersionName;
+        if (args.length > 0)
+            commitVersionName = args[0];
+        else
+            commitVersionName = String.valueOf(commitVersionChoice.getValue());
+
+        clearCurrentGraphAndSaveStatus();
+
+        for (CommitVersion commitVersionLoop : commitVersions) {
+            if (commitVersionLoop.getName().equals(commitVersionName)) {
+                currentCommitVersion = commitVersionLoop;
+                break;
+            }
+        }
+
+        setAPActivatedHboxDataSet();
+        String scope = String.valueOf(((RadioButton) group.getSelectedToggle()).getText());
+        stackPane.getChildren().clear();
+        currentGraph = new SingleGraph(currentCommitVersion.getName() + "-" + scope);
+        apOccurrence = currentCommitVersion.calculateOccurrenceInSameClass(predicateMap.get(scope));
+
+        if (occurrenceAlreadyCalculated.containsKey(currentCommitVersion.getName())) {
+            occurrenceAlreadyCalculated.get(currentCommitVersion.getName()).put(scope, apOccurrence);
+        } else {
+            HashMap<String, Map<PairAPName, Map<String, List<PairAPNameLocation>>>> hashMap = new HashMap<>();
+            hashMap.put(scope, apOccurrence);
+            occurrenceAlreadyCalculated.put(currentCommitVersion.getName(), hashMap);
+        }
+
+        currentGraph.removeAttribute("ui.stylesheet");
+        currentGraph.setAttribute("ui.antialias");
+        currentGraph.setAttribute("ui.quality");
+        FxViewer viewer = new FxViewer(currentGraph, FxViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
+        viewer.enableAutoLayout(new LinLog());
+
+        for (Map.Entry<String, List<AntiPatternInstance>> entry : currentCommitVersion.getAntiPatterns().entrySet()) {
+            if (entry.getValue().size() > 0)
+                currentGraph.addNode(entry.getKey());
+        }
+        setCssToNode();
+
+        createEdge(apOccurrence);
+        if (statusAPSelected.containsKey(commitVersionName) && statusAPSelected.get(commitVersionName).containsKey(scope)) {
+            System.out.println(commitVersionName + "++++++++++++++++++++++++++++" + scope);
+            List<Boolean> booleans = statusAPSelected.get(commitVersionName).get(scope);
+            for (int i = 0; i < booleans.size(); i++) {
+                ((RadioButton) apActivatedHbox.getChildren().get(i)).setSelected(booleans.get(i));
+            }
+        }
+
+
+
+        //currentGraph.setAttribute("ui.stylesheet", styleSheet);
+        FxDefaultView view = (FxDefaultView) viewer.addView("view1", new FxGraphRenderer());
+        view.setMouseManager(new FxMouseManager(EnumSet.of(InteractiveElement.EDGE, InteractiveElement.NODE, InteractiveElement.SPRITE)));
+        ViewerPipe pipeIn = viewer.newViewerPipe();
+        pipeIn.addAttributeSink(currentGraph);
+        pipeIn.addViewerListener(this);
+        pipeIn.pump();
+
+
+        stackPane.getChildren().add(view);
+
+        new Thread(() -> {
+            while (loop) {
+                pipeIn.pump();
+                try {
+                    sleep(40);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+    }
+
+    private void setCssToNode() {
+        for (Node node : currentGraph) {
+            node.setAttribute("ui.label", node.getId());
+            node.setAttribute("ui.style", "text-size: 15px; text-alignment: under; text-color: white; text-style: bold; text-background-mode: rounded-box; text-background-color: #222C; text-padding: 5px, 4px; text-offset: 0px, 5px;");
+
+        }
+    }
+
+    private void createEdge(Map<PairAPName, Map<String, List<PairAPNameLocation>>> apOccurrence, String... computeOnly) {
+        for (Map.Entry<PairAPName, Map<String, List<PairAPNameLocation>>> entry : apOccurrence.entrySet()) {
+            if (computeOnly.length > 0 && !entry.getKey().getName1().equals(computeOnly[0]) && !entry.getKey().getName2().equals(computeOnly[0]))
+                continue;
+
+            if (entry.getValue().size() > 0) {
+                Edge edge = currentGraph.addEdge(entry.getKey().getName1() + "-" + entry.getKey().getName2(), entry.getKey().getName1(), entry.getKey().getName2(), false);
+                edge.setAttribute("ui.style", "size: " + 4 + "px;");
+                if (entry.getValue().size() < 5) {
+                    edge.setAttribute("ui.style", "fill-color: #729ea1;");
+                    edge.setAttribute("color", "fill-color: #729ea1;");
+                } else if (entry.getValue().size() >= 5 && entry.getValue().size() < 10) {
+                    edge.setAttribute("ui.style", "fill-color: #b5bd89;");
+                    edge.setAttribute("color", "fill-color: #b5bd89;");
+                } else if (entry.getValue().size() >= 10 && entry.getValue().size() < 15) {
+                    edge.setAttribute("ui.style", "fill-color: #dfbe99;");
+                    edge.setAttribute("color", "fill-color: #dfbe99;");
+                } else if (entry.getValue().size() >= 15 && entry.getValue().size() < 20) {
+                    edge.setAttribute("ui.style", "fill-color: #ec9192;");
+                    edge.setAttribute("color", "fill-color: #ec9192;");
+                } else {
+                    edge.setAttribute("ui.style", "fill-color: #db5375;");
+                    edge.setAttribute("color", "fill-color: #db5375;");
+                }
+            }
+        }
+    }
+
+    private void clearCurrentGraphAndSaveStatus() {
+        if (currentGraph != null) {
+            if (statusAPSelected.get(currentCommitVersion.getName()).containsKey(previousScope))
+                statusAPSelected.get(currentCommitVersion.getName()).get(previousScope).clear();
+            List<Boolean> booleans = new LinkedList<>();
+            for (javafx.scene.Node radioButton : apActivatedHbox.getChildren()) {
+                booleans.add(((RadioButton) radioButton).isSelected());
+            }
+            statusAPSelected.get(currentCommitVersion.getName()).put(previousScope, booleans);
+            for (Node node : selectedNodes) {
                 unselectNode(node);
             }
         }
@@ -212,12 +288,18 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private void setChoiceBoxDataSet() {
         ObservableList data = FXCollections.observableArrayList();
-        for (CommitVersion commitVersion:commitVersions) {
-            graphsAlreadyCreated.put(commitVersion.getName(),new HashMap<>());
+        for (CommitVersion commitVersion : commitVersions) {
             data.add(commitVersion.getName());
         }
         commitVersionChoice.setItems(data);
         commitVersionChoice.setValue(data.get(0));
+    }
+
+    private void fillHasMap() {
+        for (CommitVersion commitVersion : commitVersions) {
+            occurrenceAlreadyCalculated.put(commitVersion.getName(), new HashMap<>());
+            statusAPSelected.put(commitVersion.getName(), new HashMap<>());
+        }
     }
 
     public void viewClosed(String id) {
@@ -275,7 +357,7 @@ public class ResearcherController implements Initializable, ViewerListener {
                     occurrences.setText(String.valueOf(currentCommitVersion.getAntiPatterns().get(node.getId()).size()));
                     ObservableList data = FXCollections.observableArrayList();
                     ListView listView = new ListView();
-                    for (AntiPatternInstance ap: currentCommitVersion.getAntiPatterns().get(node.getId())) {
+                    for (AntiPatternInstance ap : currentCommitVersion.getAntiPatterns().get(node.getId())) {
                         data.add(ap.getLocation().toString());
                     }
                     VBox.setVgrow(listView, Priority.ALWAYS);
@@ -288,17 +370,17 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private void fillInfo(Edge edge) {
         String[] names = edge.getId().split("-");
-        PairAPName pairAPName = new PairAPName(names[0],names[1]);
+        PairAPName pairAPName = new PairAPName(names[0], names[1]);
         Platform.runLater(
                 () -> {
                     locations.getChildren().clear();
                     aPName.setText(edge.getId());
-                    occurrences.setText(String.valueOf(classOccurrence.get(pairAPName).size()));
-                    for (Map.Entry<String, List<PairAPNameLocation>> entry : classOccurrence.get(pairAPName).entrySet()) {
+                    occurrences.setText(String.valueOf(apOccurrence.get(pairAPName).size()));
+                    for (Map.Entry<String, List<PairAPNameLocation>> entry : apOccurrence.get(pairAPName).entrySet()) {
                         TitledPane titledPane = new TitledPane();
                         titledPane.setText(entry.getKey());
                         VBox vBox = new VBox();
-                        for (PairAPNameLocation apNameLocation: entry.getValue()) {
+                        for (PairAPNameLocation apNameLocation : entry.getValue()) {
                             Text text = new Text();
                             text.setText(apNameLocation.getName() + " in " + apNameLocation.getLocation().toString());
                             vBox.getChildren().add(text);

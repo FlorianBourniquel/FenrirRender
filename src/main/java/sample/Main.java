@@ -18,10 +18,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Main extends Application {
 
@@ -62,6 +59,7 @@ public class Main extends Application {
 
         List<CommitVersion> commitVersions = new LinkedList<>();
         convertJsonfileToObject(selectedDirectory, commitVersions);
+        commitVersions.sort(Comparator.comparing(CommitVersion::getDate).reversed());
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("view/main.fxml"));
 
