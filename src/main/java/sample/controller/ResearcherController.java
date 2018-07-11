@@ -32,7 +32,7 @@ import java.util.*;
 
 import static java.lang.Thread.sleep;
 
-public class Controller implements Initializable, ViewerListener {
+public class ResearcherController implements Initializable, ViewerListener {
 
     private Graph currentGraph = null;
 
@@ -78,7 +78,7 @@ public class Controller implements Initializable, ViewerListener {
 
     private List<Node> selectedNodes = new LinkedList<>();
 
-    public Controller(List<CommitVersion> commitVersions) {
+    public ResearcherController(List<CommitVersion> commitVersions) {
         this.commitVersions = commitVersions;
     }
 

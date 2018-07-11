@@ -9,7 +9,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import sample.controller.Controller;
+import sample.controller.MainController;
+import sample.controller.ResearcherController;
 import sample.model.CommitVersion;
 import sample.utils.TimestampDeserializer;
 
@@ -62,15 +63,15 @@ public class Main extends Application {
         List<CommitVersion> commitVersions = new LinkedList<>();
         convertJsonfileToObject(selectedDirectory, commitVersions);
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("./view/sample.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("view/main.fxml"));
 
-        // Create a controller instance
-        Controller controller = new Controller(commitVersions);
+        // Create a researcherController instance
+        MainController mainController = new MainController(commitVersions);
         // Set it in the FXMLLoader
-        loader.setController(controller);
+        loader.setController(mainController);
         Parent root = loader.load();
 
-        primaryStage.setTitle("Graph");
+        primaryStage.setTitle("Mode Choice");
         Scene scene = new Scene(root, 1920, 1080);
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(e -> {
