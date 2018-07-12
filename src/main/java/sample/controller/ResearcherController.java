@@ -7,10 +7,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -26,6 +25,7 @@ import org.graphstream.ui.view.ViewerPipe;
 import org.graphstream.ui.view.util.InteractiveElement;
 import sample.model.*;
 import sample.utils.MyPredicate;
+import sample.utils.PairColorRange;
 
 import java.net.URL;
 import java.util.*;
@@ -44,17 +44,19 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private Map<String, Map<String, Integer>> apLocationAndOccurrences = new HashMap<>();
 
-
-
     private Map<String, Map<String, List<Boolean>>> statusAPSelected = new HashMap<>();
 
     private Map<String, Map<String, Map<PairAPName, Map<String, List<PairAPNameLocation>>>>> occurrenceAlreadyCalculated = new HashMap<>();
 
     private Map<String, MyPredicate> predicateMap = new HashMap<>();
 
+    private List<PairColorRange> colorRanges = new LinkedList<>();
+
     private CommitVersion currentCommitVersion;
 
-    private ToggleGroup group = new ToggleGroup();
+    private ToggleGroup scopeGroup = new ToggleGroup();
+
+    private ToggleGroup styleGroup = new ToggleGroup();
 
     private String previousScope = "Class";
 
@@ -63,6 +65,15 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     @FXML
     private RadioButton classScopeButton;
+
+    @FXML
+    private RadioButton colorStyleButton;
+
+    @FXML
+    private RadioButton thicknessStyleButton;
+
+    @FXML
+    private Button exportAllButton;
 
     @FXML
     private RadioButton functionScopeButton;
@@ -75,6 +86,9 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     @FXML
     private StackPane stackPane;
+
+    @FXML
+    private FlowPane legend;
 
     @FXML
     private VBox locations;
@@ -95,11 +109,15 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        classScopeButton.setToggleGroup(group);
-        functionScopeButton.setToggleGroup(group);
-        lineScopeButton.setToggleGroup(group);
+        legend.managedProperty().bind(legend.visibleProperty());
+        classScopeButton.setToggleGroup(scopeGroup);
+        functionScopeButton.setToggleGroup(scopeGroup);
+        lineScopeButton.setToggleGroup(scopeGroup);
         classScopeButton.setSelected(true);
+        thicknessStyleButton.setToggleGroup(styleGroup);
+        colorStyleButton.setToggleGroup(styleGroup);
+        colorStyleButton.setSelected(true);
+        setLegend();
         setChoiceBoxDataSet();
         fillHasMap();
         predicateMap.put("Class", Location::isSameClass);
@@ -107,15 +125,64 @@ public class ResearcherController implements Initializable, ViewerListener {
         predicateMap.put("Line", Location::isSame);
         createGraphForCommitVersion();
         commitVersionChoice.getSelectionModel().selectedIndexProperty().addListener((observableValue, number, number2) -> {
-            previousScope = String.valueOf(((RadioButton) group.getSelectedToggle()).getText());
+            previousScope = String.valueOf(((RadioButton) scopeGroup.getSelectedToggle()).getText());
             createGraphForCommitVersion(String.valueOf(commitVersionChoice.getItems().get((Integer) number2)));
         });
-        group.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
-            if (group.getSelectedToggle() != null) {
+        scopeGroup.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
+            if (scopeGroup.getSelectedToggle() != null) {
                 previousScope = String.valueOf(((RadioButton) old_toggle).getText());
                 createGraphForCommitVersion();
             }
         });
+        styleGroup.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
+            if (styleGroup.getSelectedToggle() != null) {
+                String s = String.valueOf(((RadioButton) new_toggle).getText());
+                if (s.equals("Color"))
+                    switchToColorStyle();
+                else
+                    switchToThicknessStyle();
+            }
+        });
+
+    }
+
+    private void switchToColorStyle() {
+        for (int i = 0; i < currentGraph.getEdgeCount(); i++) {
+            currentGraph.getEdge(i).setAttribute("ui.style", "size: " + 4 + "px;");
+            currentGraph.getEdge(i).setAttribute("ui.style",currentGraph.getEdge(i).getAttribute("color"));
+        }
+        legend.setVisible(true);
+    }
+
+    private void switchToThicknessStyle() {
+        for (int i = 0; i < currentGraph.getEdgeCount(); i++) {
+            currentGraph.getEdge(i).setAttribute("ui.style", "fill-color: black;");
+            currentGraph.getEdge(i).setAttribute("ui.style",currentGraph.getEdge(i).getAttribute("size"));
+        }
+        legend.setVisible(false);
+    }
+
+    private void setLegend() {
+        colorRanges.add(new PairColorRange(0,4,"#729ea1"));
+        colorRanges.add(new PairColorRange(5,9,"#b5bd89"));
+        colorRanges.add(new PairColorRange(10,14,"#dfbe99"));
+        colorRanges.add(new PairColorRange(15,19,"#ec9192"));
+        colorRanges.add(new PairColorRange(20,Integer.MAX_VALUE,"#db5375"));
+        for (PairColorRange colorRange: colorRanges) {
+            Rectangle rectangle = new Rectangle();
+            rectangle.setHeight(20.0);
+            rectangle.setWidth(20.0);
+            rectangle.setFill( Color.web(colorRange.getColor()));
+            Label label = new Label();
+            if (colorRange.getMin() <= 0)
+                label.setText("<" + colorRange.getMax());
+            else if (colorRange.getMax() == Integer.MAX_VALUE)
+                label.setText(">" + colorRange.getMin());
+            else
+                label.setText( "[" + colorRange.getMin() + " - " + colorRange.getMax() + "]");
+            legend.getChildren().add(rectangle);
+            legend.getChildren().add(label);
+        }
 
     }
 
@@ -155,7 +222,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void addAPToGraph(String text) {
         currentGraph.addNode(text);
         setCssToNode();
-        createEdge(occurrenceAlreadyCalculated.get(currentCommitVersion.getName()).get(String.valueOf(((RadioButton) group.getSelectedToggle()).getText())), text);
+        createEdge(occurrenceAlreadyCalculated.get(currentCommitVersion.getName()).get(String.valueOf(((RadioButton) scopeGroup.getSelectedToggle()).getText())), text);
     }
 
     private void createGraphForCommitVersion(String... args) {
@@ -175,8 +242,8 @@ public class ResearcherController implements Initializable, ViewerListener {
         }
 
         setAPActivatedHboxDataSet();
-        String scope = String.valueOf(((RadioButton) group.getSelectedToggle()).getText());
-        stackPane.getChildren().clear();
+        String scope = String.valueOf(((RadioButton) scopeGroup.getSelectedToggle()).getText());
+
         currentGraph = new SingleGraph(currentCommitVersion.getName() + "-" + scope);
         apOccurrence = currentCommitVersion.calculateOccurrenceInSameClass(predicateMap.get(scope));
 
@@ -202,7 +269,6 @@ public class ResearcherController implements Initializable, ViewerListener {
 
         createEdge(apOccurrence);
         if (statusAPSelected.containsKey(commitVersionName) && statusAPSelected.get(commitVersionName).containsKey(scope)) {
-            System.out.println(commitVersionName + "++++++++++++++++++++++++++++" + scope);
             List<Boolean> booleans = statusAPSelected.get(commitVersionName).get(scope);
             for (int i = 0; i < booleans.size(); i++) {
                 ((RadioButton) apActivatedHbox.getChildren().get(i)).setSelected(booleans.get(i));
@@ -219,8 +285,10 @@ public class ResearcherController implements Initializable, ViewerListener {
         pipeIn.addViewerListener(this);
         pipeIn.pump();
 
+        if (stackPane.getChildren().size() >= 2)
+            stackPane.getChildren().remove(0);
+        stackPane.getChildren().add(0,view);
 
-        stackPane.getChildren().add(view);
 
         new Thread(() -> {
             while (loop) {
@@ -250,24 +318,19 @@ public class ResearcherController implements Initializable, ViewerListener {
 
             if (entry.getValue().size() > 0) {
                 Edge edge = currentGraph.addEdge(entry.getKey().getName1() + "-" + entry.getKey().getName2(), entry.getKey().getName1(), entry.getKey().getName2(), false);
-                edge.setAttribute("ui.style", "size: " + 4 + "px;");
-                if (entry.getValue().size() < 5) {
-                    edge.setAttribute("ui.style", "fill-color: #729ea1;");
-                    edge.setAttribute("color", "fill-color: #729ea1;");
-                } else if (entry.getValue().size() >= 5 && entry.getValue().size() < 10) {
-                    edge.setAttribute("ui.style", "fill-color: #b5bd89;");
-                    edge.setAttribute("color", "fill-color: #b5bd89;");
-                } else if (entry.getValue().size() >= 10 && entry.getValue().size() < 15) {
-                    edge.setAttribute("ui.style", "fill-color: #dfbe99;");
-                    edge.setAttribute("color", "fill-color: #dfbe99;");
-                } else if (entry.getValue().size() >= 15 && entry.getValue().size() < 20) {
-                    edge.setAttribute("ui.style", "fill-color: #ec9192;");
-                    edge.setAttribute("color", "fill-color: #ec9192;");
-                } else {
-                    edge.setAttribute("ui.style", "fill-color: #db5375;");
-                    edge.setAttribute("color", "fill-color: #db5375;");
+                for (PairColorRange colorRange:colorRanges) {
+                    if (entry.getValue().size() >= colorRange.getMin() && entry.getValue().size() <= colorRange.getMax()) {
+                        edge.setAttribute("color", "fill-color: "+colorRange.getColor()+";");
+                        edge.setAttribute("size", "size: " + entry.getValue().size() + "px;");
+                        break;
+                    }
                 }
             }
+            String s = String.valueOf(((RadioButton) styleGroup.getSelectedToggle()).getText());
+            if (s.equals("Color"))
+                switchToColorStyle();
+            else
+                switchToThicknessStyle();
         }
     }
 
