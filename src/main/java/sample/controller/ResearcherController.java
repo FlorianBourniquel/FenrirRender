@@ -11,6 +11,9 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -27,7 +30,12 @@ import sample.model.*;
 import sample.utils.MyPredicate;
 import sample.utils.PairColorRange;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -143,7 +151,29 @@ public class ResearcherController implements Initializable, ViewerListener {
                     switchToThicknessStyle();
             }
         });
+        exportAllButton.setOnAction((event) -> {
+            try {
+                String csvFile = "./developer.csv";
+                BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFile));
+                CSVFormat csvFileFormat = CSVFormat.EXCEL.withHeader();
+                CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("AP Name").withAllowMissingColumnNames());
 
+                for (Map.Entry<PairAPName, Map<String, List<PairAPNameLocation>>> entry : apOccurrence.entrySet()) {
+                    List<String> list = new LinkedList<>();
+                    list.add(entry.getKey().toString());
+                    for(Map.Entry<String, List<PairAPNameLocation>> subEntry : entry.getValue().entrySet()) {
+                        for (PairAPNameLocation apNameLocation : subEntry.getValue()) {
+                            list.add("\"" + apNameLocation.getName() + " in " + apNameLocation.getLocation().toString() + "\"");
+                        }
+                    }
+                    csvPrinter.printRecord(list);
+                }
+                csvPrinter.flush();
+                csvPrinter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void switchToColorStyle() {
@@ -326,12 +356,12 @@ public class ResearcherController implements Initializable, ViewerListener {
                     }
                 }
             }
-            String s = String.valueOf(((RadioButton) styleGroup.getSelectedToggle()).getText());
-            if (s.equals("Color"))
-                switchToColorStyle();
-            else
-                switchToThicknessStyle();
         }
+        String s = String.valueOf(((RadioButton) styleGroup.getSelectedToggle()).getText());
+        if (s.equals("Color"))
+            switchToColorStyle();
+        else
+            switchToThicknessStyle();
     }
 
     private void clearCurrentGraphAndSaveStatus() {

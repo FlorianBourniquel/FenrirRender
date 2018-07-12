@@ -33,4 +33,9 @@ public class PairAPName {
     public String getName2() {
         return name2;
     }
+
+    @Override
+    public String toString() {
+        return name1 + '-' + name2;
+    }
 }
