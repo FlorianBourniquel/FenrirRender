@@ -90,6 +90,9 @@ public class ResearcherController implements Initializable, ViewerListener {
     private Button exportAllButton;
 
     @FXML
+    private Button exportLocationButton;
+
+    @FXML
     private RadioButton functionScopeButton;
 
     @FXML
@@ -172,7 +175,7 @@ public class ResearcherController implements Initializable, ViewerListener {
                 //Show save file dialog
                 File file = fileChooser.showSaveDialog(new Stage());
 
-                if(file != null){
+                if (file != null) {
 
                     BufferedWriter writer = Files.newBufferedWriter(Paths.get(file.getAbsolutePath()));
                     CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("AP Name").withAllowMissingColumnNames());
@@ -180,7 +183,7 @@ public class ResearcherController implements Initializable, ViewerListener {
                     for (Map.Entry<PairAPName, Map<String, List<PairAPDataLocation>>> entry : apOccurrence.entrySet()) {
                         List<String> list = new LinkedList<>();
                         list.add(entry.getKey().toString());
-                        for(Map.Entry<String, List<PairAPDataLocation>> subEntry : entry.getValue().entrySet()) {
+                        for (Map.Entry<String, List<PairAPDataLocation>> subEntry : entry.getValue().entrySet()) {
                             for (PairAPDataLocation apNameLocation : subEntry.getValue()) {
                                 list.add("\"" + apNameLocation.getName() + " in " + apNameLocation.getLocation().toString() + "\"");
                             }
@@ -195,12 +198,60 @@ public class ResearcherController implements Initializable, ViewerListener {
                 e.printStackTrace();
             }
         });
+        exportLocationButton.setOnAction((event) -> {
+            try {
+                FileChooser fileChooser = new FileChooser();
+
+                //Set extension filter
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.txt)", "*.csv");
+                fileChooser.getExtensionFilters().add(extFilter);
+
+                //Show save file dialog
+                File file = fileChooser.showSaveDialog(new Stage());
+
+                if (file != null) {
+
+                    BufferedWriter writer = Files.newBufferedWriter(Paths.get(file.getAbsolutePath()));
+
+                    if (selectedNodes.size() >= 2) {
+                        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withAllowMissingColumnNames());
+                        for (javafx.scene.Node titledPane: locations.getChildren()) {
+                            List<String> list = new LinkedList<>();
+                            list.add(((TitledPane) titledPane).getText());
+                            VBox vBox = (VBox) ((TitledPane) titledPane).getContent();
+                            for (javafx.scene.Node text : vBox.getChildren()) {
+                                list.add(((Text) text).getText());
+                            }
+                            csvPrinter.printRecord(list);
+                        }
+                        csvPrinter.flush();
+                        csvPrinter.close();
+                    }
+                    else if (selectedNodes.size() >= 1) {
+                        ListView listView = (ListView) locations.getChildren().get(0);
+                        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader( aPName.getText() + " locations").withAllowMissingColumnNames());
+                        List<String> list = listView.getItems();
+                        for (String s : list) {
+                            csvPrinter.printRecord(s);
+                        }
+                        csvPrinter.flush();
+                        csvPrinter.close();
+                    }
+
+
+
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void switchToColorStyle() {
         for (int i = 0; i < currentGraph.getEdgeCount(); i++) {
             currentGraph.getEdge(i).setAttribute("ui.style", "size: " + 4 + "px;");
-            currentGraph.getEdge(i).setAttribute("ui.style",currentGraph.getEdge(i).getAttribute("color"));
+            currentGraph.getEdge(i).setAttribute("ui.style", currentGraph.getEdge(i).getAttribute("color"));
         }
         legend.setVisible(true);
     }
@@ -208,29 +259,29 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void switchToThicknessStyle() {
         for (int i = 0; i < currentGraph.getEdgeCount(); i++) {
             currentGraph.getEdge(i).setAttribute("ui.style", "fill-color: black;");
-            currentGraph.getEdge(i).setAttribute("ui.style",currentGraph.getEdge(i).getAttribute("size"));
+            currentGraph.getEdge(i).setAttribute("ui.style", currentGraph.getEdge(i).getAttribute("size"));
         }
         legend.setVisible(false);
     }
 
     private void setLegend() {
-        colorRanges.add(new PairColorRange(0,4,"#729ea1"));
-        colorRanges.add(new PairColorRange(5,9,"#b5bd89"));
-        colorRanges.add(new PairColorRange(10,14,"#dfbe99"));
-        colorRanges.add(new PairColorRange(15,19,"#ec9192"));
-        colorRanges.add(new PairColorRange(20,Integer.MAX_VALUE,"#db5375"));
-        for (PairColorRange colorRange: colorRanges) {
+        colorRanges.add(new PairColorRange(0, 4, "#729ea1"));
+        colorRanges.add(new PairColorRange(5, 9, "#b5bd89"));
+        colorRanges.add(new PairColorRange(10, 14, "#dfbe99"));
+        colorRanges.add(new PairColorRange(15, 19, "#ec9192"));
+        colorRanges.add(new PairColorRange(20, Integer.MAX_VALUE, "#db5375"));
+        for (PairColorRange colorRange : colorRanges) {
             Rectangle rectangle = new Rectangle();
             rectangle.setHeight(20.0);
             rectangle.setWidth(20.0);
-            rectangle.setFill( Color.web(colorRange.getColor()));
+            rectangle.setFill(Color.web(colorRange.getColor()));
             Label label = new Label();
             if (colorRange.getMin() <= 0)
                 label.setText("<" + colorRange.getMax());
             else if (colorRange.getMax() == Integer.MAX_VALUE)
                 label.setText(">" + colorRange.getMin());
             else
-                label.setText( "[" + colorRange.getMin() + " - " + colorRange.getMax() + "]");
+                label.setText("[" + colorRange.getMin() + " - " + colorRange.getMax() + "]");
             legend.getChildren().add(rectangle);
             legend.getChildren().add(label);
         }
@@ -240,7 +291,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void setAPActivatedHboxDataSet() {
         apActivatedHbox.getChildren().clear();
         List<RadioButton> radioButtonList = new LinkedList<>();
-        for (CommitVersion commitVersion: currentCommitVersionList) {
+        for (CommitVersion commitVersion : currentCommitVersionList) {
             for (Map.Entry<String, List<AntiPatternInstance>> entry : commitVersion.getAntiPatterns().entrySet()) {
                 Optional<RadioButton> matchingObject = radioButtonList.stream().filter(p -> p.getText().equals(entry.getKey())).findFirst();
                 if (matchingObject.isPresent())
@@ -262,7 +313,7 @@ public class ResearcherController implements Initializable, ViewerListener {
                 });
                 radioButtonList.add(radioButton);
                 apActivatedHbox.getChildren().add(radioButton);
-        }
+            }
 
 
         }
@@ -271,7 +322,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void removeAPToGraph(String text) {
         for (int i = 0; i < currentGraph.getEdgeCount(); i++) {
             if (currentGraph.getEdge(i).getNode0().getId().equals(text) || currentGraph.getEdge(i).getNode1().getId().equals(text)) {
-                unselectEdge(currentGraph.getEdge(i).getNode0(),currentGraph.getEdge(i).getNode1());
+                unselectEdge(currentGraph.getEdge(i).getNode0(), currentGraph.getEdge(i).getNode1());
                 currentGraph.removeEdge(i);
             }
         }
@@ -300,7 +351,7 @@ public class ResearcherController implements Initializable, ViewerListener {
         String scope = String.valueOf(((RadioButton) scopeGroup.getSelectedToggle()).getText());
 
         StringBuilder nameBuilder = new StringBuilder();
-        for (CommitVersion commitVersion: currentCommitVersionList) {
+        for (CommitVersion commitVersion : currentCommitVersionList) {
             nameBuilder.append(commitVersion.getName()).append("-");
         }
         allCommitVersionName = nameBuilder.toString();
@@ -326,7 +377,7 @@ public class ResearcherController implements Initializable, ViewerListener {
         viewer.enableAutoLayout(new LinLog());
 
         List<String> nodeAlreadyCreated = new LinkedList<>();
-        for (CommitVersion commitVersion:currentCommitVersionList) {
+        for (CommitVersion commitVersion : currentCommitVersionList) {
             for (Map.Entry<String, List<AntiPatternInstance>> entry : commitVersion.getAntiPatterns().entrySet()) {
                 if (entry.getValue().size() > 0 && !nodeAlreadyCreated.contains(entry.getKey())) {
                     currentGraph.addNode(entry.getKey());
@@ -346,7 +397,6 @@ public class ResearcherController implements Initializable, ViewerListener {
         }
 
 
-
         //currentGraph.setAttribute("ui.stylesheet", styleSheet);
         FxDefaultView view = (FxDefaultView) viewer.addView("view1", new FxGraphRenderer());
         view.setMouseManager(new FxMouseManager(EnumSet.of(InteractiveElement.EDGE, InteractiveElement.NODE, InteractiveElement.SPRITE)));
@@ -357,7 +407,7 @@ public class ResearcherController implements Initializable, ViewerListener {
 
         if (stackPane.getChildren().size() >= 2)
             stackPane.getChildren().remove(0);
-        stackPane.getChildren().add(0,view);
+        stackPane.getChildren().add(0, view);
 
 
         new Thread(() -> {
@@ -386,11 +436,11 @@ public class ResearcherController implements Initializable, ViewerListener {
             if (computeOnly.length > 0 && !entry.getKey().getName1().equals(computeOnly[0]) && !entry.getKey().getName2().equals(computeOnly[0]))
                 continue;
 
-            if (entry.getValue().size() > 0 &&currentGraph.getNode(entry.getKey().getName2())!=null && currentGraph.getNode(entry.getKey().getName1())!=null) {
+            if (entry.getValue().size() > 0 && currentGraph.getNode(entry.getKey().getName2()) != null && currentGraph.getNode(entry.getKey().getName1()) != null) {
                 Edge edge = currentGraph.addEdge(entry.getKey().getName1() + "-" + entry.getKey().getName2(), entry.getKey().getName1(), entry.getKey().getName2(), false);
-                for (PairColorRange colorRange:colorRanges) {
+                for (PairColorRange colorRange : colorRanges) {
                     if (entry.getValue().size() >= colorRange.getMin() && entry.getValue().size() <= colorRange.getMax()) {
-                        edge.setAttribute("color", "fill-color: "+colorRange.getColor()+";");
+                        edge.setAttribute("color", "fill-color: " + colorRange.getColor() + ";");
                         edge.setAttribute("size", "size: " + entry.getValue().size() + "px;");
                         break;
                     }
@@ -407,7 +457,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void clearCurrentGraphAndSaveStatus() {
         if (currentGraph != null) {
             if (!statusAPSelected.containsKey(allCommitVersionName))
-                statusAPSelected.put(allCommitVersionName,new HashMap<>());
+                statusAPSelected.put(allCommitVersionName, new HashMap<>());
             if (statusAPSelected.get(allCommitVersionName).containsKey(previousScope))
                 statusAPSelected.get(allCommitVersionName).get(previousScope).clear();
             List<Boolean> booleans = new LinkedList<>();
@@ -484,10 +534,12 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void fillInfo(Node node) {
         Platform.runLater(
                 () -> {
+                    exportLocationButton.setDisable(false);
+                    exportLocationButton.setVisible(true);
                     ObservableList data = FXCollections.observableArrayList();
                     locations.getChildren().clear();
                     aPName.setText(node.getId());
-                    for (CommitVersion commitVersion:currentCommitVersionList) {
+                    for (CommitVersion commitVersion : currentCommitVersionList) {
                         for (AntiPatternInstance ap : commitVersion.getAntiPatterns().get(node.getId())) {
                             data.add(ap.getLocation().toString());
                         }

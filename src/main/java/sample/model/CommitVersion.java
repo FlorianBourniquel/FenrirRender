@@ -87,7 +87,7 @@ public class CommitVersion {
                             for (AntiPatternInstance apSub: entryTmp.getValue()) {
                                 if (locationAlreadyProcessed.get(pairAPName).contains(ap.getLocation().getClassLocation())) {
                                     if (!entry.getKey().equals(entryTmp.getKey()))
-                                        map.get(pairAPName).get(ap.getLocation().getClassLocation()).add(new PairAPDataLocation(entry.getKey(),ap.getLocation()));
+                                        map.get(pairAPName).get(ap.getLocation().getClassLocation()).add(new PairAPDataLocation(commitVersion.getName() + " - "  + entry.getKey(),ap.getLocation()));
                                     continue myLabel;
                                 }
                                 if (predicate.testLocation(ap.getLocation(),apSub.getLocation())) {
@@ -96,7 +96,7 @@ public class CommitVersion {
                             }
 
                             if (!entry.getKey().equals(entryTmp.getKey())  && apNameLocations.size() > 0) {
-                                apNameLocations.add(new PairAPDataLocation(entry.getKey(), ap.getLocation()));
+                                apNameLocations.add(new PairAPDataLocation(commitVersion.getName() + " - " + entry.getKey(), ap.getLocation()));
                                 locationAlreadyProcessed.get(pairAPName).add(ap.getLocation().getClassLocation());
                                 if (map.get(pairAPName).containsKey(ap.getLocation().getClassLocation()))
                                     map.get(pairAPName).get(ap.getLocation().getClassLocation()).addAll(apNameLocations);
@@ -104,7 +104,7 @@ public class CommitVersion {
                                     map.get(pairAPName).put(ap.getLocation().getClassLocation(), apNameLocations);
                             } else if (apNameLocations.size() > 1) {
                                 locationAlreadyProcessed.get(pairAPName).add(ap.getLocation().getClassLocation());
-                                apNameLocations.add(new PairAPDataLocation(entry.getKey(), ap.getLocation()));
+                                apNameLocations.add(new PairAPDataLocation(commitVersion.getName() + " - " + entry.getKey(), ap.getLocation()));
                                 if (map.get(pairAPName).containsKey(ap.getLocation().getClassLocation()))
                                     map.get(pairAPName).get(ap.getLocation().getClassLocation()).addAll(apNameLocations);
                                 else

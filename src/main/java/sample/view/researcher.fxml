@@ -72,6 +72,7 @@
                         <FlowPane alignment="CENTER_LEFT" hgap="5.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
                            <children>
                               <Button id="exportAllButton" fx:id="exportAllButton" mnemonicParsing="false" text="Export All" />
+                              <Button id="exportLocationButton" fx:id="exportLocationButton" disable="true" mnemonicParsing="false" text="Export Location" visible="false" />
                            </children>
                         </FlowPane>
                         <Label text="Style :" GridPane.rowIndex="1" />
