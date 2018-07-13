@@ -1,10 +1,10 @@
 package sample.model;
 
-public class PairAPNameLocation {
+public class PairAPDataLocation {
     private String name;
     private  Location location;
 
-    public PairAPNameLocation(String name, Location location) {
+    public PairAPDataLocation(String name, Location location) {
         this.name = name;
         this.location = location;
     }

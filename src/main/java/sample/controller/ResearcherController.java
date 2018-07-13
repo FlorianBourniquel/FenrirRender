@@ -11,9 +11,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.QuoteMode;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -31,7 +32,7 @@ import sample.utils.MyPredicate;
 import sample.utils.PairColorRange;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -44,23 +45,25 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private Graph currentGraph = null;
 
+    private String allCommitVersionName;
+
     private boolean loop = true;
 
     private List<CommitVersion> commitVersions;
 
-    private Map<PairAPName, Map<String, List<PairAPNameLocation>>> apOccurrence;
+    private Map<PairAPName, Map<String, List<PairAPDataLocation>>> apOccurrence;
 
     private Map<String, Map<String, Integer>> apLocationAndOccurrences = new HashMap<>();
 
     private Map<String, Map<String, List<Boolean>>> statusAPSelected = new HashMap<>();
 
-    private Map<String, Map<String, Map<PairAPName, Map<String, List<PairAPNameLocation>>>>> occurrenceAlreadyCalculated = new HashMap<>();
+    private Map<String, Map<String, Map<PairAPName, Map<String, List<PairAPDataLocation>>>>> occurrenceAlreadyCalculated = new HashMap<>();
 
     private Map<String, MyPredicate> predicateMap = new HashMap<>();
 
     private List<PairColorRange> colorRanges = new LinkedList<>();
 
-    private CommitVersion currentCommitVersion;
+    private List<CommitVersion> currentCommitVersionList = new LinkedList<>();
 
     private ToggleGroup scopeGroup = new ToggleGroup();
 
@@ -73,6 +76,9 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     @FXML
     private RadioButton classScopeButton;
+
+    @FXML
+    private GridPane gridPaneLeft;
 
     @FXML
     private RadioButton colorStyleButton;
@@ -90,7 +96,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     private RadioButton lineScopeButton;
 
     @FXML
-    private ChoiceBox commitVersionChoice;
+    private TitledPane commitVersionChoice;
 
     @FXML
     private StackPane stackPane;
@@ -100,6 +106,9 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     @FXML
     private VBox locations;
+
+    @FXML
+    private FlowPane flowPaneCommitVersions;
 
     @FXML
     private HBox apActivatedHbox;
@@ -126,15 +135,16 @@ public class ResearcherController implements Initializable, ViewerListener {
         colorStyleButton.setToggleGroup(styleGroup);
         colorStyleButton.setSelected(true);
         setLegend();
-        setChoiceBoxDataSet();
-        fillHasMap();
+        setCommitChoiceDataSet();
         predicateMap.put("Class", Location::isSameClass);
         predicateMap.put("Function", Location::isSameClassAndFunction);
         predicateMap.put("Line", Location::isSame);
         createGraphForCommitVersion();
-        commitVersionChoice.getSelectionModel().selectedIndexProperty().addListener((observableValue, number, number2) -> {
-            previousScope = String.valueOf(((RadioButton) scopeGroup.getSelectedToggle()).getText());
-            createGraphForCommitVersion(String.valueOf(commitVersionChoice.getItems().get((Integer) number2)));
+        commitVersionChoice.expandedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue)
+                gridPaneLeft.getRowConstraints().get(0).setPercentHeight(200);
+            else
+                gridPaneLeft.getRowConstraints().get(0).setPercentHeight(3);
         });
         scopeGroup.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
             if (scopeGroup.getSelectedToggle() != null) {
@@ -153,23 +163,34 @@ public class ResearcherController implements Initializable, ViewerListener {
         });
         exportAllButton.setOnAction((event) -> {
             try {
-                String csvFile = "./developer.csv";
-                BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFile));
-                CSVFormat csvFileFormat = CSVFormat.EXCEL.withHeader();
-                CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("AP Name").withAllowMissingColumnNames());
+                FileChooser fileChooser = new FileChooser();
 
-                for (Map.Entry<PairAPName, Map<String, List<PairAPNameLocation>>> entry : apOccurrence.entrySet()) {
-                    List<String> list = new LinkedList<>();
-                    list.add(entry.getKey().toString());
-                    for(Map.Entry<String, List<PairAPNameLocation>> subEntry : entry.getValue().entrySet()) {
-                        for (PairAPNameLocation apNameLocation : subEntry.getValue()) {
-                            list.add("\"" + apNameLocation.getName() + " in " + apNameLocation.getLocation().toString() + "\"");
+                //Set extension filter
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.txt)", "*.csv");
+                fileChooser.getExtensionFilters().add(extFilter);
+
+                //Show save file dialog
+                File file = fileChooser.showSaveDialog(new Stage());
+
+                if(file != null){
+
+                    BufferedWriter writer = Files.newBufferedWriter(Paths.get(file.getAbsolutePath()));
+                    CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("AP Name").withAllowMissingColumnNames());
+
+                    for (Map.Entry<PairAPName, Map<String, List<PairAPDataLocation>>> entry : apOccurrence.entrySet()) {
+                        List<String> list = new LinkedList<>();
+                        list.add(entry.getKey().toString());
+                        for(Map.Entry<String, List<PairAPDataLocation>> subEntry : entry.getValue().entrySet()) {
+                            for (PairAPDataLocation apNameLocation : subEntry.getValue()) {
+                                list.add("\"" + apNameLocation.getName() + " in " + apNameLocation.getLocation().toString() + "\"");
+                            }
                         }
+                        csvPrinter.printRecord(list);
                     }
-                    csvPrinter.printRecord(list);
+                    csvPrinter.flush();
+                    csvPrinter.close();
                 }
-                csvPrinter.flush();
-                csvPrinter.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -218,23 +239,32 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private void setAPActivatedHboxDataSet() {
         apActivatedHbox.getChildren().clear();
-        for (Map.Entry<String, List<AntiPatternInstance>> entry : currentCommitVersion.getAntiPatterns().entrySet()) {
-            RadioButton radioButton = new RadioButton();
-            radioButton.setText(entry.getKey());
-            HBox.setHgrow(radioButton, Priority.ALWAYS);
-            radioButton.setAlignment(Pos.CENTER);
-            radioButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            radioButton.setSelected(true);
-            radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
-                if (!block) {
-                    if (isNowSelected) {
-                        addAPToGraph(radioButton.getText());
-                    } else {
-                        removeAPToGraph(radioButton.getText());
+        List<RadioButton> radioButtonList = new LinkedList<>();
+        for (CommitVersion commitVersion: currentCommitVersionList) {
+            for (Map.Entry<String, List<AntiPatternInstance>> entry : commitVersion.getAntiPatterns().entrySet()) {
+                Optional<RadioButton> matchingObject = radioButtonList.stream().filter(p -> p.getText().equals(entry.getKey())).findFirst();
+                if (matchingObject.isPresent())
+                    continue;
+                RadioButton radioButton = new RadioButton();
+                radioButton.setText(entry.getKey());
+                HBox.setHgrow(radioButton, Priority.ALWAYS);
+                radioButton.setAlignment(Pos.CENTER);
+                radioButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+                radioButton.setSelected(true);
+                radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
+                    if (!block) {
+                        if (isNowSelected) {
+                            addAPToGraph(radioButton.getText());
+                        } else {
+                            removeAPToGraph(radioButton.getText());
+                        }
                     }
-                }
-            });
-            apActivatedHbox.getChildren().add(radioButton);
+                });
+                radioButtonList.add(radioButton);
+                apActivatedHbox.getChildren().add(radioButton);
+        }
+
+
         }
     }
 
@@ -252,37 +282,41 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void addAPToGraph(String text) {
         currentGraph.addNode(text);
         setCssToNode();
-        createEdge(occurrenceAlreadyCalculated.get(currentCommitVersion.getName()).get(String.valueOf(((RadioButton) scopeGroup.getSelectedToggle()).getText())), text);
+        createEdge(occurrenceAlreadyCalculated.get(allCommitVersionName).get(String.valueOf(((RadioButton) scopeGroup.getSelectedToggle()).getText())), text);
     }
 
     private void createGraphForCommitVersion(String... args) {
-        String commitVersionName;
-        if (args.length > 0)
-            commitVersionName = args[0];
-        else
-            commitVersionName = String.valueOf(commitVersionChoice.getValue());
-
         clearCurrentGraphAndSaveStatus();
-
-        for (CommitVersion commitVersionLoop : commitVersions) {
-            if (commitVersionLoop.getName().equals(commitVersionName)) {
-                currentCommitVersion = commitVersionLoop;
-                break;
+        currentCommitVersionList.clear();
+        for (javafx.scene.Node commitVersionLoop : flowPaneCommitVersions.getChildren()) {
+            RadioButton radioButton = (RadioButton) commitVersionLoop;
+            if (radioButton.isSelected()) {
+                Optional<CommitVersion> matchingObject = commitVersions.stream().filter(p -> p.getName().equals(radioButton.getText())).findFirst();
+                matchingObject.ifPresent(commitVersion -> currentCommitVersionList.add(commitVersion));
             }
         }
 
         setAPActivatedHboxDataSet();
         String scope = String.valueOf(((RadioButton) scopeGroup.getSelectedToggle()).getText());
 
-        currentGraph = new SingleGraph(currentCommitVersion.getName() + "-" + scope);
-        apOccurrence = currentCommitVersion.calculateOccurrenceInSameClass(predicateMap.get(scope));
+        StringBuilder nameBuilder = new StringBuilder();
+        for (CommitVersion commitVersion: currentCommitVersionList) {
+            nameBuilder.append(commitVersion.getName()).append("-");
+        }
+        allCommitVersionName = nameBuilder.toString();
+        currentGraph = new SingleGraph(allCommitVersionName + "-" + scope);
+        if (occurrenceAlreadyCalculated.containsKey(allCommitVersionName) && occurrenceAlreadyCalculated.get(allCommitVersionName).containsKey(scope))
+            apOccurrence = occurrenceAlreadyCalculated.get(allCommitVersionName).get(scope);
+        else {
+            apOccurrence = CommitVersion.calculateOccurrence(predicateMap.get(scope), currentCommitVersionList);
 
-        if (occurrenceAlreadyCalculated.containsKey(currentCommitVersion.getName())) {
-            occurrenceAlreadyCalculated.get(currentCommitVersion.getName()).put(scope, apOccurrence);
-        } else {
-            HashMap<String, Map<PairAPName, Map<String, List<PairAPNameLocation>>>> hashMap = new HashMap<>();
-            hashMap.put(scope, apOccurrence);
-            occurrenceAlreadyCalculated.put(currentCommitVersion.getName(), hashMap);
+            if (occurrenceAlreadyCalculated.containsKey(allCommitVersionName)) {
+                occurrenceAlreadyCalculated.get(allCommitVersionName).put(scope, apOccurrence);
+            } else {
+                HashMap<String, Map<PairAPName, Map<String, List<PairAPDataLocation>>>> hashMap = new HashMap<>();
+                hashMap.put(scope, apOccurrence);
+                occurrenceAlreadyCalculated.put(allCommitVersionName, hashMap);
+            }
         }
 
         currentGraph.removeAttribute("ui.stylesheet");
@@ -291,15 +325,21 @@ public class ResearcherController implements Initializable, ViewerListener {
         FxViewer viewer = new FxViewer(currentGraph, FxViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         viewer.enableAutoLayout(new LinLog());
 
-        for (Map.Entry<String, List<AntiPatternInstance>> entry : currentCommitVersion.getAntiPatterns().entrySet()) {
-            if (entry.getValue().size() > 0)
-                currentGraph.addNode(entry.getKey());
+        List<String> nodeAlreadyCreated = new LinkedList<>();
+        for (CommitVersion commitVersion:currentCommitVersionList) {
+            for (Map.Entry<String, List<AntiPatternInstance>> entry : commitVersion.getAntiPatterns().entrySet()) {
+                if (entry.getValue().size() > 0 && !nodeAlreadyCreated.contains(entry.getKey())) {
+                    currentGraph.addNode(entry.getKey());
+                    nodeAlreadyCreated.add(entry.getKey());
+                }
+            }
         }
+
         setCssToNode();
 
         createEdge(apOccurrence);
-        if (statusAPSelected.containsKey(commitVersionName) && statusAPSelected.get(commitVersionName).containsKey(scope)) {
-            List<Boolean> booleans = statusAPSelected.get(commitVersionName).get(scope);
+        if (statusAPSelected.containsKey(allCommitVersionName) && statusAPSelected.get(allCommitVersionName).containsKey(scope)) {
+            List<Boolean> booleans = statusAPSelected.get(allCommitVersionName).get(scope);
             for (int i = 0; i < booleans.size(); i++) {
                 ((RadioButton) apActivatedHbox.getChildren().get(i)).setSelected(booleans.get(i));
             }
@@ -341,12 +381,12 @@ public class ResearcherController implements Initializable, ViewerListener {
         }
     }
 
-    private void createEdge(Map<PairAPName, Map<String, List<PairAPNameLocation>>> apOccurrence, String... computeOnly) {
-        for (Map.Entry<PairAPName, Map<String, List<PairAPNameLocation>>> entry : apOccurrence.entrySet()) {
+    private void createEdge(Map<PairAPName, Map<String, List<PairAPDataLocation>>> apOccurrence, String... computeOnly) {
+        for (Map.Entry<PairAPName, Map<String, List<PairAPDataLocation>>> entry : apOccurrence.entrySet()) {
             if (computeOnly.length > 0 && !entry.getKey().getName1().equals(computeOnly[0]) && !entry.getKey().getName2().equals(computeOnly[0]))
                 continue;
 
-            if (entry.getValue().size() > 0) {
+            if (entry.getValue().size() > 0 &&currentGraph.getNode(entry.getKey().getName2())!=null && currentGraph.getNode(entry.getKey().getName1())!=null) {
                 Edge edge = currentGraph.addEdge(entry.getKey().getName1() + "-" + entry.getKey().getName2(), entry.getKey().getName1(), entry.getKey().getName2(), false);
                 for (PairColorRange colorRange:colorRanges) {
                     if (entry.getValue().size() >= colorRange.getMin() && entry.getValue().size() <= colorRange.getMax()) {
@@ -366,32 +406,31 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private void clearCurrentGraphAndSaveStatus() {
         if (currentGraph != null) {
-            if (statusAPSelected.get(currentCommitVersion.getName()).containsKey(previousScope))
-                statusAPSelected.get(currentCommitVersion.getName()).get(previousScope).clear();
+            if (!statusAPSelected.containsKey(allCommitVersionName))
+                statusAPSelected.put(allCommitVersionName,new HashMap<>());
+            if (statusAPSelected.get(allCommitVersionName).containsKey(previousScope))
+                statusAPSelected.get(allCommitVersionName).get(previousScope).clear();
             List<Boolean> booleans = new LinkedList<>();
             for (javafx.scene.Node radioButton : apActivatedHbox.getChildren()) {
                 booleans.add(((RadioButton) radioButton).isSelected());
             }
-            statusAPSelected.get(currentCommitVersion.getName()).put(previousScope, booleans);
+            statusAPSelected.get(allCommitVersionName).put(previousScope, booleans);
             for (Node node : selectedNodes) {
                 unselectNode(node);
             }
         }
     }
 
-    private void setChoiceBoxDataSet() {
-        ObservableList data = FXCollections.observableArrayList();
-        for (CommitVersion commitVersion : commitVersions) {
-            data.add(commitVersion.getName());
-        }
-        commitVersionChoice.setItems(data);
-        commitVersionChoice.setValue(data.get(0));
-    }
-
-    private void fillHasMap() {
-        for (CommitVersion commitVersion : commitVersions) {
-            occurrenceAlreadyCalculated.put(commitVersion.getName(), new HashMap<>());
-            statusAPSelected.put(commitVersion.getName(), new HashMap<>());
+    private void setCommitChoiceDataSet() {
+        for (int i = 0; i < commitVersions.size(); i++) {
+            RadioButton radioButton = new RadioButton();
+            radioButton.setText(commitVersions.get(i).getName());
+            if (i == 0)
+                radioButton.setSelected(true);
+            radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
+                createGraphForCommitVersion();
+            });
+            flowPaneCommitVersions.getChildren().add(radioButton);
         }
     }
 
@@ -445,17 +484,19 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void fillInfo(Node node) {
         Platform.runLater(
                 () -> {
+                    ObservableList data = FXCollections.observableArrayList();
                     locations.getChildren().clear();
                     aPName.setText(node.getId());
-                    occurrences.setText(String.valueOf(currentCommitVersion.getAntiPatterns().get(node.getId()).size()));
-                    ObservableList data = FXCollections.observableArrayList();
-                    ListView listView = new ListView();
-                    for (AntiPatternInstance ap : currentCommitVersion.getAntiPatterns().get(node.getId())) {
-                        data.add(ap.getLocation().toString());
+                    for (CommitVersion commitVersion:currentCommitVersionList) {
+                        for (AntiPatternInstance ap : commitVersion.getAntiPatterns().get(node.getId())) {
+                            data.add(ap.getLocation().toString());
+                        }
                     }
+                    ListView listView = new ListView();
                     VBox.setVgrow(listView, Priority.ALWAYS);
                     listView.setItems(data);
                     locations.getChildren().add(listView);
+                    occurrences.setText(String.valueOf(data.size()));
                 }
         );
 
@@ -469,11 +510,11 @@ public class ResearcherController implements Initializable, ViewerListener {
                     locations.getChildren().clear();
                     aPName.setText(edge.getId());
                     occurrences.setText(String.valueOf(apOccurrence.get(pairAPName).size()));
-                    for (Map.Entry<String, List<PairAPNameLocation>> entry : apOccurrence.get(pairAPName).entrySet()) {
+                    for (Map.Entry<String, List<PairAPDataLocation>> entry : apOccurrence.get(pairAPName).entrySet()) {
                         TitledPane titledPane = new TitledPane();
                         titledPane.setText(entry.getKey());
                         VBox vBox = new VBox();
-                        for (PairAPNameLocation apNameLocation : entry.getValue()) {
+                        for (PairAPDataLocation apNameLocation : entry.getValue()) {
                             Text text = new Text();
                             text.setText(apNameLocation.getName() + " in " + apNameLocation.getLocation().toString());
                             vBox.getChildren().add(text);

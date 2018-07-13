@@ -1,11 +1,9 @@
 package sample.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.sun.tools.javac.util.Pair;
 import sample.utils.MyPredicate;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 public class CommitVersion {
 
@@ -68,44 +66,57 @@ public class CommitVersion {
         return antiPatterns;
     }
 
-    public Map<PairAPName, Map<String,List<PairAPNameLocation>>> calculateOccurrenceInSameClass(MyPredicate predicate){
-        List<PairAPName> alreadyProcessed = new LinkedList<>();
-        Map<PairAPName, Map<String,List<PairAPNameLocation>>> map = new HashMap<>();
+    public static Map<PairAPName, Map<String,List<PairAPDataLocation>>> calculateOccurrence(MyPredicate predicate, List<CommitVersion> commitVersionList){
+        Map<PairAPName, Map<String,List<PairAPDataLocation>>> map = new HashMap<>();
+        for (CommitVersion commitVersion:commitVersionList) {
+            Map<PairAPName, List<String>> locationAlreadyProcessed = new HashMap<>();
+            List<PairAPName> apAlreadyProcessed = new LinkedList<>();
+            for (Map.Entry<String, List<AntiPatternInstance>> entry : commitVersion.getAntiPatterns().entrySet()) {
+                for (Map.Entry<String, List<AntiPatternInstance>> entryTmp : commitVersion.getAntiPatterns().entrySet()) {
+                    PairAPName pairAPName;
+                    if (entry.getKey().compareToIgnoreCase(entryTmp.getKey()) < 0)
+                        pairAPName = new PairAPName(entry.getKey(),entryTmp.getKey());
+                    else
+                        pairAPName = new PairAPName(entryTmp.getKey(),entry.getKey());
+                    if (!apAlreadyProcessed.contains(pairAPName)){
+                        locationAlreadyProcessed.put(pairAPName,new LinkedList<>());
+                        if (!map.containsKey(pairAPName))
+                            map.put(pairAPName,new HashMap<>());
+                        myLabel: for (AntiPatternInstance ap: entry.getValue()) {
+                            List<PairAPDataLocation> apNameLocations = new LinkedList<>();
+                            for (AntiPatternInstance apSub: entryTmp.getValue()) {
+                                if (locationAlreadyProcessed.get(pairAPName).contains(ap.getLocation().getClassLocation())) {
+                                    if (!entry.getKey().equals(entryTmp.getKey()))
+                                        map.get(pairAPName).get(ap.getLocation().getClassLocation()).add(new PairAPDataLocation(entry.getKey(),ap.getLocation()));
+                                    continue myLabel;
+                                }
+                                if (predicate.testLocation(ap.getLocation(),apSub.getLocation())) {
+                                    apNameLocations.add(new PairAPDataLocation(commitVersion.getName() + " - " + entryTmp.getKey(), apSub.getLocation()));
+                                }
+                            }
 
-        for (Map.Entry<String, List<AntiPatternInstance>> entry : antiPatterns.entrySet())
-        {
-            for (Map.Entry<String, List<AntiPatternInstance>> entryTmp : antiPatterns.entrySet()) {
-                PairAPName pairAPName;
-                if (entry.getKey().compareToIgnoreCase(entryTmp.getKey()) < 0)
-                    pairAPName = new PairAPName(entry.getKey(),entryTmp.getKey());
-                else
-                    pairAPName = new PairAPName(entryTmp.getKey(),entry.getKey());
-                if (!alreadyProcessed.contains(pairAPName)){
-                    map.put(pairAPName,new HashMap<>());
-                    myLabel: for (AntiPatternInstance ap: entry.getValue()) {
-                        List<PairAPNameLocation> apNameLocations = new LinkedList<>();
-                        for (AntiPatternInstance apSub: entryTmp.getValue()) {
-                            if (map.get(pairAPName).containsKey(ap.getLocation().getClassLocation())) {
-                                if (!entry.getKey().equals(entryTmp.getKey()))
-                                    map.get(pairAPName).get(ap.getLocation().getClassLocation()).add(new PairAPNameLocation(entry.getKey(),ap.getLocation()));
-                                continue myLabel;
+                            if (!entry.getKey().equals(entryTmp.getKey())  && apNameLocations.size() > 0) {
+                                apNameLocations.add(new PairAPDataLocation(entry.getKey(), ap.getLocation()));
+                                locationAlreadyProcessed.get(pairAPName).add(ap.getLocation().getClassLocation());
+                                if (map.get(pairAPName).containsKey(ap.getLocation().getClassLocation()))
+                                    map.get(pairAPName).get(ap.getLocation().getClassLocation()).addAll(apNameLocations);
+                                else
+                                    map.get(pairAPName).put(ap.getLocation().getClassLocation(), apNameLocations);
+                            } else if (apNameLocations.size() > 1) {
+                                locationAlreadyProcessed.get(pairAPName).add(ap.getLocation().getClassLocation());
+                                apNameLocations.add(new PairAPDataLocation(entry.getKey(), ap.getLocation()));
+                                if (map.get(pairAPName).containsKey(ap.getLocation().getClassLocation()))
+                                    map.get(pairAPName).get(ap.getLocation().getClassLocation()).addAll(apNameLocations);
+                                else
+                                    map.get(pairAPName).put(ap.getLocation().getClassLocation(), apNameLocations);
                             }
-                            if (predicate.testLocation(ap.getLocation(),apSub.getLocation())) {
-                                apNameLocations.add(new PairAPNameLocation(entryTmp.getKey(), apSub.getLocation()));
-                            }
-                        }
-                        if (!entry.getKey().equals(entryTmp.getKey()) && apNameLocations.size() > 0) {
-                            apNameLocations.add(new PairAPNameLocation(entry.getKey(), ap.getLocation()));
-                            map.get(pairAPName).put(ap.getLocation().getClassLocation(), apNameLocations);
-                        } else if (apNameLocations.size() > 1) {
-                            apNameLocations.add(new PairAPNameLocation(entry.getKey(), ap.getLocation()));
-                            map.get(pairAPName).put(ap.getLocation().getClassLocation(), apNameLocations);
                         }
                     }
+                    apAlreadyProcessed.add(pairAPName);
                 }
-                alreadyProcessed.add(pairAPName);
             }
         }
+
         return map;
     }
 
