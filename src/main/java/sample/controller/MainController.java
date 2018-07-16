@@ -16,6 +16,7 @@ import sample.model.CommitVersion;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -38,16 +39,21 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         researcherMode.setOnAction(event -> createNewWindows("../view/researcher.fxml"));
+        architectMode.setOnAction(event -> createNewWindows("../view/architect.fxml"));
     }
 
     private void createNewWindows(String path) {
         Stage stage = new Stage();
         FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
 
-        // Create a researcherController instance
-        ResearcherController researcherController = new ResearcherController(commitVersions);
+        Initializable controller;
+        if (path.contains("researcher"))
+            controller = new ResearcherController(commitVersions);
+        else
+            controller = new ArchitectController(commitVersions);
+
         // Set it in the FXMLLoader
-        loader.setController(researcherController);
+        loader.setController(controller);
         try {
             Parent root = loader.load();
             stage.setTitle("Graph");

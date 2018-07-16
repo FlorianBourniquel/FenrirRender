@@ -13,6 +13,8 @@ public class AntiPatternInstance {
     @SerializedName("data")
     private Map<String,String> data;
 
+    private String apName;
+
     public AntiPatternInstance(Location location, Map<String, String> data) {
         this.location = location;
         this.data = data;
@@ -26,4 +28,11 @@ public class AntiPatternInstance {
         return data;
     }
 
+    public String getApName() {
+        return apName;
+    }
+
+    public void setApName(String apName) {
+        this.apName = apName;
+    }
 }

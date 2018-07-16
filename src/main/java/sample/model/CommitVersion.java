@@ -21,6 +21,8 @@ public class CommitVersion {
 
     private Map<String, List<PairLocationOccurrence>> apLocationsAndOccurrences = new HashMap<>();
 
+    private Map<String, List<AntiPatternInstance>> apByClasses = null;
+
     public CommitVersion(String name, String commit, long date, Map<String, List<AntiPatternInstance>> antiPatterns) {
         this.name = name;
         this.commit = commit;
@@ -128,6 +130,25 @@ public class CommitVersion {
             }
         }
         pairLocationOccurrences.add(new PairLocationOccurrence(location));
+    }
+
+    public Map<String, List<AntiPatternInstance>> getApByClasses() {
+        if (apByClasses == null) {
+            apByClasses = new HashMap<>();
+            for (Map.Entry<String, List<AntiPatternInstance>> entry : antiPatterns.entrySet()) {
+                for (AntiPatternInstance antiPatternInstance: entry.getValue()) {
+                    antiPatternInstance.setApName(entry.getKey());
+                    if (apByClasses.containsKey(antiPatternInstance.getLocation().getClassLocation()))
+                        apByClasses.get(antiPatternInstance.getLocation().getClassLocation()).add(antiPatternInstance);
+                    else {
+                        List<AntiPatternInstance> list = new LinkedList<>();
+                        list.add(antiPatternInstance);
+                        apByClasses.put(antiPatternInstance.getLocation().getClassLocation(),list);
+                    }
+                }
+            }
+        }
+        return apByClasses;
     }
 
 }
