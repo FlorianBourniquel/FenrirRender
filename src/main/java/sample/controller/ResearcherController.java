@@ -478,6 +478,9 @@ public class ResearcherController implements Initializable, ViewerListener {
             if (i == 0)
                 radioButton.setSelected(true);
             radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
+                while (selectedNodes.size() > 0) {
+                    unselectNode(selectedNodes.get(0));
+                }
                 createGraphForCommitVersion();
             });
             flowPaneCommitVersions.getChildren().add(radioButton);

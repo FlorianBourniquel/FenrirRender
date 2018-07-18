@@ -44,6 +44,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.afester.javafx</groupId>
+            <artifactId>FranzXaver</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.5</version>
