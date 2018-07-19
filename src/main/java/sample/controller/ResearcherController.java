@@ -565,14 +565,33 @@ public class ResearcherController implements Initializable, ViewerListener {
                     locations.getChildren().clear();
                     aPName.setText(edge.getId());
                     occurrences.setText(String.valueOf(apOccurrence.get(pairAPName).size()));
+
                     for (Map.Entry<String, List<PairAPDataLocation>> entry : apOccurrence.get(pairAPName).entrySet()) {
                         TitledPane titledPane = new TitledPane();
                         titledPane.setText(entry.getKey());
                         VBox vBox = new VBox();
+                        HashMap<String, TitledPane> titledPaneHashMap = new HashMap<>();
                         for (PairAPDataLocation apNameLocation : entry.getValue()) {
                             Text text = new Text();
                             text.setText(apNameLocation.getName() + " in " + apNameLocation.getLocation().toString());
-                            vBox.getChildren().add(text);
+                            if (titledPaneHashMap.containsKey(apNameLocation.getLocation().getFunctionLocation())) {
+                                ((VBox) titledPaneHashMap.get(apNameLocation.getLocation().getFunctionLocation()).getContent()).getChildren().add(text);
+                            }
+                            else {
+                                VBox vBox1 = new VBox();
+                                TitledPane titledPane1 = new TitledPane();
+                                titledPane1.setExpanded(false);
+                                vBox1.getChildren().add(text);
+                                titledPane1.setContent(vBox1);
+                                if (apNameLocation.getLocation().getFunctionLocation().equals(""))
+                                    titledPane1.setText("Unknown");
+                                else
+                                    titledPane1.setText(apNameLocation.getLocation().getFunctionLocation());
+                                titledPaneHashMap.put(apNameLocation.getLocation().getFunctionLocation(),titledPane1);
+                            }
+                        }
+                        for (Map.Entry<String, TitledPane> entry1 : titledPaneHashMap.entrySet()) {
+                            vBox.getChildren().add(entry1.getValue());
                         }
                         titledPane.setContent(vBox);
                         titledPane.setExpanded(false);

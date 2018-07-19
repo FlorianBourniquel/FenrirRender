@@ -1,8 +1,6 @@
 package sample.controller;
 
 import afester.javafx.svg.SvgLoader;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
@@ -39,30 +38,16 @@ public class ArchitectController implements Initializable {
     @FXML
     private FlowPane classFlowPane;
 
+    @FXML
+    private StackPane stackPane;
+
     public ArchitectController(List<CommitVersion> commitVersions) {
         this.commitVersions = commitVersions;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        svgRanges.add(new SVGRange(0,0,false,"../../building-0-0.svg"));
-        svgRanges.add(new SVGRange(1,5,false,"../../building-1-5.svg"));
-        svgRanges.add(new SVGRange(6,10,false,"../../building-6-10.svg"));
-        svgRanges.add(new SVGRange(11,15,false,"../../building-11-15.svg"));
-        svgRanges.add(new SVGRange(16,20,false,"../../building-16-20.svg"));
-        svgRanges.add(new SVGRange(21,25,false,"../../building-21-25.svg"));
-        svgRanges.add(new SVGRange(26,30,false,"../../building-26-30.svg"));
-        svgRanges.add(new SVGRange(31,35,false,"../../building-31-35.svg"));
-        svgRanges.add(new SVGRange(36,Integer.MAX_VALUE,false,"../../building-36-40.svg"));
-        svgRanges.add(new SVGRange(1,5,true,"../../building-1-5-fire.svg"));
-        svgRanges.add(new SVGRange(6,10,true,"../../building-6-10-fire.svg"));
-        svgRanges.add(new SVGRange(11,15,true,"../../building-11-15-fire.svg"));
-        svgRanges.add(new SVGRange(16,20,true,"../../building-16-20-fire.svg"));
-        svgRanges.add(new SVGRange(21,26,true,"../../building-21-25-fire.svg"));
-        svgRanges.add(new SVGRange(26,30,true,"../../building-26-30-fire.svg"));
-        svgRanges.add(new SVGRange(31,35,true,"../../building-31-35-fire.svg"));
-        svgRanges.add(new SVGRange(36,Integer.MAX_VALUE,true,"../../building-36-40-fire.svg"));
-
+        setSVGRanges();
         commitVersions.sort(Comparator.comparing(CommitVersion::getDate));
         setProjectChoiceDataSet();
         setClassFlowPane();
@@ -74,35 +59,66 @@ public class ArchitectController implements Initializable {
 
     }
 
+    private void setSVGRanges() {
+        svgRanges.add(new SVGRange(0, 0, 0, "../../building-0-0.svg"));
+        svgRanges.add(new SVGRange(1, 5, 0, "../../building-1-5.svg"));
+        svgRanges.add(new SVGRange(6, 10, 0, "../../building-6-10.svg"));
+        svgRanges.add(new SVGRange(11, 15, 0, "../../building-11-15.svg"));
+        svgRanges.add(new SVGRange(16, 20, 0, "../../building-16-20.svg"));
+        svgRanges.add(new SVGRange(21, 25, 0, "../../building-21-25.svg"));
+        svgRanges.add(new SVGRange(26, 30, 0, "../../building-26-30.svg"));
+        svgRanges.add(new SVGRange(31, 35, 0, "../../building-31-35.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 0, "../../building-36-40.svg"));
+        svgRanges.add(new SVGRange(1, 5, 1, "../../building-1-5-fire.svg"));
+        svgRanges.add(new SVGRange(6, 10, 1, "../../building-6-10-fire.svg"));
+        svgRanges.add(new SVGRange(11, 15, 1, "../../building-11-15-fire.svg"));
+        svgRanges.add(new SVGRange(16, 20, 1, "../../building-16-20-fire.svg"));
+        svgRanges.add(new SVGRange(21, 26, 1, "../../building-21-25-fire.svg"));
+        svgRanges.add(new SVGRange(26, 30, 1, "../../building-26-30-fire.svg"));
+        svgRanges.add(new SVGRange(31, 35, 1, "../../building-31-35-fire.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 1, "../../building-36-40-fire.svg"));
+        svgRanges.add(new SVGRange(1, 5, -1, "../../building-1-5-heal.svg"));
+        svgRanges.add(new SVGRange(6, 10, -1, "../../building-6-10-heal.svg"));
+        svgRanges.add(new SVGRange(11, 15, -1, "../../building-11-15-heal.svg"));
+        svgRanges.add(new SVGRange(16, 20, -1, "../../building-16-20-heal.svg"));
+        svgRanges.add(new SVGRange(21, 26, -1, "../../building-21-25-heal.svg"));
+        svgRanges.add(new SVGRange(26, 30, -1, "../../building-26-30-heal.svg"));
+        svgRanges.add(new SVGRange(31, 35, -1, "../../building-31-35-heal.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, -1, "../../building-36-40-heal.svg"));
+    }
+
     private void setClassFlowPane() {
         int index = (int) commitSlider.getValue();
         Map<String, List<AntiPatternInstance>> apByClasses = currentCommitVersions.get(index).getApByClasses();
         if (currentIndexPackage == 0) {
             Object[] strings = apByClasses.keySet().toArray();
             if (strings.length > 2)
-                currentIndexPackage = lastIndexOfSameSubSeq(strings[0].toString(),strings[1].toString());
+                currentIndexPackage = lastIndexOfSameSubSeq(strings[0].toString(), strings[1].toString());
         }
-        for (Map.Entry<String, List<AntiPatternInstance>> entry:apByClasses.entrySet()) {
+        for (Map.Entry<String, List<AntiPatternInstance>> entry : apByClasses.entrySet()) {
             if (!classNames.contains(entry.getKey()))
                 classNames.add(entry.getKey());
 
         }
         classFlowPane.getChildren().clear();
-        for (String className:classNames) {
-
-            boolean isFire = false;
+        for (String className : classNames) {
+            int isFireHealOrNeutral = 0;
             if (index > 0) {
-                if (currentCommitVersions.get(index-1).getApByClasses().containsKey(className) && currentCommitVersions.get(index-1).getApByClasses().equals(apByClasses))
-                    isFire = true;
-                else if (!currentCommitVersions.get(index-1).getApByClasses().containsKey(className))
-                    isFire = true;
+                if (currentCommitVersions.get(index - 1).getApByClasses().containsKey(className) && currentCommitVersions.get(index).getApByClasses().containsKey(className)) {
+                    if (currentCommitVersions.get(index - 1).getApByClasses().get(className).size() < currentCommitVersions.get(index).getApByClasses().get(className).size())
+                        isFireHealOrNeutral = 1;
+                    else if (currentCommitVersions.get(index - 1).getApByClasses().get(className).size() > currentCommitVersions.get(index).getApByClasses().get(className).size())
+                        isFireHealOrNeutral = -1;
+                }
+                else if (!currentCommitVersions.get(index - 1).getApByClasses().containsKey(className))
+                    isFireHealOrNeutral = 1;
             }
-            final boolean finalIsFire = isFire;
+            final int finalIsFireHealOrNeutral = isFireHealOrNeutral;
 
             InputStream svgFile = getClass()
                     .getResourceAsStream(svgRanges.stream()
                             .filter(svgRange -> apByClasses.containsKey(className)
-                                    && svgRange.isFire() == finalIsFire
+                                    && svgRange.isFireHealOrNeutral() == finalIsFireHealOrNeutral
                                     && svgRange.getMax() >= apByClasses.get(className).size()
                                     && svgRange.getMin() <= apByClasses.get(className).size())
                             .findFirst()
@@ -120,12 +136,13 @@ public class ArchitectController implements Initializable {
             // create a button and set the graphics node
             Button button = new Button();
 
-            button.setPrefSize(270.0,170.0);
-            button.setMinSize(270.0,170.0);
+            button.setPrefSize(270.0, 170.0);
+            button.setMinSize(270.0, 170.0);
             graphic.scaleXProperty().bind(button.widthProperty().divide(70));
             graphic.scaleYProperty().bind(button.heightProperty().divide(70));
             button.setGraphic(graphic);
             button.setContentDisplay(ContentDisplay.BOTTOM);
+            button.setUserData(className);
             VBox vBox = new VBox();
             Text text = new Text(className.substring(currentIndexPackage));
             vBox.getChildren().add(button);
@@ -137,7 +154,34 @@ public class ArchitectController implements Initializable {
                 vBox.setDisable(true);
             }
 
+            button.setOnAction(event -> showClassDetails(button.getUserData().toString(),currentCommitVersions.get(0).getApByClasses().get(button.getUserData().toString())));
+
         }
+    }
+
+    private void showClassDetails(String s,List<AntiPatternInstance> apByClasses) {
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        VBox vBox = new VBox();
+        VBox vBoxChild = new VBox();
+        for (int i = 0; i < apByClasses.size() ; i++) {
+            if (i > 0 && !apByClasses.get(i).getApName().equals(apByClasses.get(i-1).getApName())){
+                TitledPane titledPane = new TitledPane();
+                titledPane.setContent(vBoxChild);
+                titledPane.setText(apByClasses.get(i-1).getApName());
+                vBox.getChildren().add(titledPane);
+                vBoxChild = new VBox();
+            }
+            vBoxChild.getChildren().add(new Text(apByClasses.get(i).getLocation().toString()));
+        }
+        TitledPane titledPane = new TitledPane();
+        titledPane.setContent(vBoxChild);
+        titledPane.setText(apByClasses.get(apByClasses.size()-1).getApName());
+        vBox.getChildren().add(titledPane);
+        scrollPane.setContent(vBox);
+        stackPane.getChildren().add(scrollPane);
+
     }
 
     private int lastIndexOfSameSubSeq(String s, String s1) {
@@ -167,7 +211,7 @@ public class ArchitectController implements Initializable {
 
     private void handleProjectChange(String newProjectName) {
         currentIndexPackage = 0;
-        for (CommitVersion commitVersion:commitVersions) {
+        for (CommitVersion commitVersion : commitVersions) {
             if (commitVersion.getName().contains(newProjectName)) {
                 currentCommitVersions.add(commitVersion);
             }
