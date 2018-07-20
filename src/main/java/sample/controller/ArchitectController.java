@@ -3,6 +3,8 @@ package sample.controller;
 import afester.javafx.svg.SvgLoader;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -164,6 +166,12 @@ public class ArchitectController implements Initializable {
         scrollPane.setFitToHeight(true);
         scrollPane.setFitToWidth(true);
         VBox vBox = new VBox();
+        Button exitButton = new Button();
+        exitButton.setText("X");
+        exitButton.setPrefHeight(30);
+        exitButton.getStyleClass().add("closebutton");
+        exitButton.setOnAction(event -> stackPane.getChildren().remove(scrollPane));
+        vBox.getChildren().add(exitButton);
         VBox vBoxChild = new VBox();
         for (int i = 0; i < apByClasses.size() ; i++) {
             if (i > 0 && !apByClasses.get(i).getApName().equals(apByClasses.get(i-1).getApName())){

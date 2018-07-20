@@ -1,0 +1,4 @@
+.closebutton {
+    -fx-background-color: red, red;
+    -fx-border-radius: 30;
+}
