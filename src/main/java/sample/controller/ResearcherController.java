@@ -87,6 +87,9 @@ public class ResearcherController implements Initializable, ViewerListener {
     private RadioButton thicknessStyleButton;
 
     @FXML
+    private Button clearNotLinked;
+
+    @FXML
     private Button exportAllButton;
 
     @FXML
@@ -162,6 +165,14 @@ public class ResearcherController implements Initializable, ViewerListener {
                     switchToColorStyle();
                 else
                     switchToThicknessStyle();
+            }
+        });
+        clearNotLinked.setOnAction((event) -> {
+            for (javafx.scene.Node node: apActivatedHbox.getChildren()) {
+               RadioButton radioButton = ((RadioButton) node);
+               Optional<Edge> optionalEdge = currentGraph.edges().filter(n -> n.getNode1().getId().equals(radioButton.getText()) || n.getNode0().getId().equals(radioButton.getText())).findFirst();
+               if (!optionalEdge.isPresent())
+                   radioButton.setSelected(false);
             }
         });
         exportAllButton.setOnAction((event) -> {

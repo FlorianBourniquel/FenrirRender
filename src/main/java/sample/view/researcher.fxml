@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <GridPane id="girdPane" fx:id="girdPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
     <columnConstraints>
@@ -67,7 +68,16 @@
                                     </children>
                                 </HBox>
                         <Label text="AP activated :" GridPane.rowIndex="2" />
-                        <HBox id="apActivatedHbox" fx:id="apActivatedHbox" alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
+                        <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
+                           <children>
+                              <Button id="clearNotLinked" fx:id="clearNotLinked" graphicTextGap="2.0" mnemonicParsing="false" text="Clear not Linked">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Button>
+                              <HBox id="apActivatedHbox" fx:id="apActivatedHbox" alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                           </children>
+                        </HBox>
                         <Label text="Export :" GridPane.rowIndex="7" />
                         <FlowPane alignment="CENTER_LEFT" hgap="5.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
                            <children>

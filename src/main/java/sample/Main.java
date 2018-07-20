@@ -11,6 +11,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import sample.controller.MainController;
 import sample.controller.ResearcherController;
+import sample.model.AntiPatternInstance;
 import sample.model.CommitVersion;
 import sample.utils.TimestampDeserializer;
 
