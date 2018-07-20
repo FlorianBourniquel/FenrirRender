@@ -9,10 +9,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 import sample.model.AntiPatternInstance;
@@ -41,7 +40,11 @@ public class ArchitectController implements Initializable {
     private FlowPane classFlowPane;
 
     @FXML
+    private HBox apHBox;
+
+    @FXML
     private StackPane stackPane;
+    private int index;
 
     public ArchitectController(List<CommitVersion> commitVersions) {
         this.commitVersions = commitVersions;
@@ -90,7 +93,7 @@ public class ArchitectController implements Initializable {
     }
 
     private void setClassFlowPane() {
-        int index = (int) commitSlider.getValue();
+        index = (int) commitSlider.getValue();
         Map<String, List<AntiPatternInstance>> apByClasses = currentCommitVersions.get(index).getApByClasses();
         if (currentIndexPackage == 0) {
             Object[] strings = apByClasses.keySet().toArray();
@@ -156,8 +159,62 @@ public class ArchitectController implements Initializable {
                 vBox.setDisable(true);
             }
 
-            button.setOnAction(event -> showClassDetails(button.getUserData().toString(),currentCommitVersions.get(0).getApByClasses().get(button.getUserData().toString())));
+            button.setOnAction(event -> showClassDetails(button.getUserData().toString(),currentCommitVersions.get(index).getApByClasses().get(button.getUserData().toString())));
 
+            setAPHboxDataSet();
+
+        }
+    }
+
+    private void setAPHboxDataSet() {
+        apHBox.getChildren().clear();
+        for (String ap :currentCommitVersions.get(index).getAntiPatterns().keySet()) {
+            RadioButton radioButton = new RadioButton();
+            radioButton.setText(ap);
+            HBox.setHgrow(radioButton, Priority.ALWAYS);
+            radioButton.setAlignment(Pos.CENTER);
+            radioButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            radioButton.setSelected(false);
+            radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
+                    if (isNowSelected) {
+                        addAPUnderline(radioButton.getText());
+                    } else {
+                        removeAPUnderline(radioButton.getText());
+                    }
+            });
+            apHBox.getChildren().add(radioButton);
+        }
+    }
+
+    private void removeAPUnderline(String text) {
+        List<String> apSelected = new LinkedList<>();
+        for (Node node : apHBox.getChildren()) {
+            RadioButton radioButton = (RadioButton) node;
+            if (radioButton.isSelected())
+                apSelected.add(radioButton.getText());
+        }
+        myLabel: for (Node node : classFlowPane.getChildren()) {
+            VBox vBox = (VBox) node;
+            List<AntiPatternInstance> antiPatternInstanceList = currentCommitVersions.get(index).getApByClasses().get(vBox.getChildren().get(0).getUserData().toString());
+            if (antiPatternInstanceList != null && antiPatternInstanceList.stream().anyMatch(ap -> ap.getApName().equals(text))) {
+                for (String s: apSelected) {
+                    if (antiPatternInstanceList.stream().anyMatch(ap -> ap.getApName().equals(s)))
+                        continue myLabel;
+                }
+                Button button = (Button) vBox.getChildren().get(0);
+                button.setStyle("-fx-border-color: transparent;");
+            }
+        }
+    }
+
+    private void addAPUnderline(String text) {
+        for (Node node : classFlowPane.getChildren()) {
+            VBox vBox = (VBox) node;
+            List<AntiPatternInstance> antiPatternInstanceList = currentCommitVersions.get(index).getApByClasses().get(vBox.getChildren().get(0).getUserData().toString());
+            if (antiPatternInstanceList != null && antiPatternInstanceList.stream().anyMatch(ap -> ap.getApName().equals(text))) {
+                Button button = (Button) vBox.getChildren().get(0);
+                button.setStyle("-fx-border-width: 5 5 5 5; -fx-border-color: purple;");
+            }
         }
     }
 
