@@ -308,7 +308,7 @@ public class ResearcherController implements Initializable, ViewerListener {
                 if (matchingObject.isPresent())
                     continue;
                 RadioButton radioButton = new RadioButton();
-                radioButton.setText(entry.getKey());
+                radioButton.setGraphic(new Text(entry.getKey()));
                 HBox.setHgrow(radioButton, Priority.ALWAYS);
                 radioButton.setAlignment(Pos.CENTER);
                 radioButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);

@@ -45,7 +45,7 @@
                                 <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" vgrow="ALWAYS" />
                             </rowConstraints>
                             <children>
-                                <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="382.0" prefWidth="198.0" text="AP Name :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.vgrow="ALWAYS" />
+                                <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="382.0" prefWidth="198.0" text="AP Name :" textOverrun="CLIP" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" GridPane.vgrow="ALWAYS" />
                                 <Label text="Occurrences :" GridPane.rowIndex="5" />
                                 <Label alignment="TOP_LEFT" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Location :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" GridPane.vgrow="ALWAYS" />
                                 <Label id="aPName" fx:id="aPName" GridPane.columnIndex="1" GridPane.rowIndex="4" />
@@ -75,7 +75,11 @@
                                     <Font size="10.0" />
                                  </font>
                               </Button>
-                              <HBox id="apActivatedHbox" fx:id="apActivatedHbox" alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                              <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vbarPolicy="NEVER" HBox.hgrow="ALWAYS">
+                                 <content>
+                                    <HBox id="apActivatedHbox" fx:id="apActivatedHbox" alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" />
+                                 </content>
+                              </ScrollPane>
                            </children>
                         </HBox>
                         <Label text="Export :" GridPane.rowIndex="7" />
