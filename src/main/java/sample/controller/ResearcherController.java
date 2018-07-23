@@ -148,7 +148,7 @@ public class ResearcherController implements Initializable, ViewerListener {
         createGraphForCommitVersion();
         commitVersionChoice.expandedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue)
-                gridPaneLeft.getRowConstraints().get(0).setPercentHeight(200);
+                gridPaneLeft.getRowConstraints().get(0).setPercentHeight(110);
             else
                 gridPaneLeft.getRowConstraints().get(0).setPercentHeight(3);
         });
