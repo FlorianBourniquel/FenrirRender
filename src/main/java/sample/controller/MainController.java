@@ -40,6 +40,7 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         researcherMode.setOnAction(event -> createNewWindows("../view/researcher.fxml"));
         architectMode.setOnAction(event -> createNewWindows("../view/architect.fxml"));
+        developerMode.setOnAction(event -> createNewWindows("../view/developer.fxml"));
     }
 
     private void createNewWindows(String path) {
@@ -49,8 +50,10 @@ public class MainController implements Initializable {
         Initializable controller;
         if (path.contains("researcher"))
             controller = new ResearcherController(commitVersions);
-        else
+        else if (path.contains("architect"))
             controller = new ArchitectController(commitVersions);
+        else
+            controller = new DeveloperController(commitVersions);
 
         // Set it in the FXMLLoader
         loader.setController(controller);
@@ -59,7 +62,7 @@ public class MainController implements Initializable {
             stage.setTitle("Graph");
             Scene scene = new Scene(root, 1920, 1080);
             stage.setScene(scene);
-            if (path.contains("architect"))
+            if (path.contains("architect") || path.contains("developer"))
                 scene.getStylesheets().add("./StyleSheetArchitectView.css");
             stage.show();
         } catch (IOException e) {

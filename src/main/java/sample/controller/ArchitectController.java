@@ -24,11 +24,11 @@ import java.util.*;
 
 public class ArchitectController implements Initializable {
 
-    private List<CommitVersion> commitVersions;
-    private List<String> classNames = new LinkedList<>();
-    private List<CommitVersion> currentCommitVersions = new LinkedList<>();
-    private List<SVGRange> svgRanges = new LinkedList<>();
-    private int currentIndexPackage = 0;
+    protected List<CommitVersion> commitVersions;
+    protected List<String> classNames = new LinkedList<>();
+    protected List<CommitVersion> currentCommitVersions = new LinkedList<>();
+    protected List<SVGRange> svgRanges = new LinkedList<>();
+    protected int currentIndexPackage = 0;
 
     @FXML
     private ChoiceBox projectChoice;
@@ -44,7 +44,7 @@ public class ArchitectController implements Initializable {
 
     @FXML
     private StackPane stackPane;
-    private int index;
+    protected int index;
 
     public ArchitectController(List<CommitVersion> commitVersions) {
         this.commitVersions = commitVersions;
@@ -64,32 +64,33 @@ public class ArchitectController implements Initializable {
 
     }
 
-    private void setSVGRanges() {
-        svgRanges.add(new SVGRange(0, 0, 0, "../../building-0-0.svg"));
-        svgRanges.add(new SVGRange(1, 5, 0, "../../building-1-5.svg"));
-        svgRanges.add(new SVGRange(6, 10, 0, "../../building-6-10.svg"));
-        svgRanges.add(new SVGRange(11, 15, 0, "../../building-11-15.svg"));
-        svgRanges.add(new SVGRange(16, 20, 0, "../../building-16-20.svg"));
-        svgRanges.add(new SVGRange(21, 25, 0, "../../building-21-25.svg"));
-        svgRanges.add(new SVGRange(26, 30, 0, "../../building-26-30.svg"));
-        svgRanges.add(new SVGRange(31, 35, 0, "../../building-31-35.svg"));
-        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 0, "../../building-36-40.svg"));
-        svgRanges.add(new SVGRange(1, 5, 1, "../../building-1-5-fire.svg"));
-        svgRanges.add(new SVGRange(6, 10, 1, "../../building-6-10-fire.svg"));
-        svgRanges.add(new SVGRange(11, 15, 1, "../../building-11-15-fire.svg"));
-        svgRanges.add(new SVGRange(16, 20, 1, "../../building-16-20-fire.svg"));
-        svgRanges.add(new SVGRange(21, 26, 1, "../../building-21-25-fire.svg"));
-        svgRanges.add(new SVGRange(26, 30, 1, "../../building-26-30-fire.svg"));
-        svgRanges.add(new SVGRange(31, 35, 1, "../../building-31-35-fire.svg"));
-        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 1, "../../building-36-40-fire.svg"));
-        svgRanges.add(new SVGRange(1, 5, -1, "../../building-1-5-heal.svg"));
-        svgRanges.add(new SVGRange(6, 10, -1, "../../building-6-10-heal.svg"));
-        svgRanges.add(new SVGRange(11, 15, -1, "../../building-11-15-heal.svg"));
-        svgRanges.add(new SVGRange(16, 20, -1, "../../building-16-20-heal.svg"));
-        svgRanges.add(new SVGRange(21, 26, -1, "../../building-21-25-heal.svg"));
-        svgRanges.add(new SVGRange(26, 30, -1, "../../building-26-30-heal.svg"));
-        svgRanges.add(new SVGRange(31, 35, -1, "../../building-31-35-heal.svg"));
-        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, -1, "../../building-36-40-heal.svg"));
+    protected void setSVGRanges() {
+        svgRanges.add(new SVGRange(0, 0, 0, "../../building/building-0-0.svg"));
+        svgRanges.add(new SVGRange(1, 5, 0, "../../building/building-1-5.svg"));
+        svgRanges.add(new SVGRange(6, 10, 0, "../../building/building-6-10.svg"));
+        svgRanges.add(new SVGRange(11, 15, 0, "../../building/building-11-15.svg"));
+        svgRanges.add(new SVGRange(16, 20, 0, "../../building/building-16-20.svg"));
+        svgRanges.add(new SVGRange(21, 25, 0, "../../building/building-21-25.svg"));
+        svgRanges.add(new SVGRange(26, 30, 0, "../../building/building-26-30.svg"));
+        svgRanges.add(new SVGRange(31, 35, 0, "../../building/building-31-35.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 0, "../../building/building-36-40.svg"));
+        svgRanges.add(new SVGRange(1, 5, 1, "../../building/building-1-5-fire.svg"));
+        svgRanges.add(new SVGRange(6, 10, 1, "../../building/building-6-10-fire.svg"));
+        svgRanges.add(new SVGRange(11, 15, 1, "../../building/building-11-15-fire.svg"));
+        svgRanges.add(new SVGRange(16, 20, 1, "../../building/building-16-20-fire.svg"));
+        svgRanges.add(new SVGRange(21, 26, 1, "../../building/building-21-25-fire.svg"));
+        svgRanges.add(new SVGRange(26, 30, 1, "../../building/building-26-30-fire.svg"));
+        svgRanges.add(new SVGRange(31, 35, 1, "../../building/building-31-35-fire.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 1, "../../building/building-36-40-fire.svg"));
+        svgRanges.add(new SVGRange(0, 0, -1, "../../building/building-0-0-heal.svg"));
+        svgRanges.add(new SVGRange(1, 5, -1, "../../building/building-1-5-heal.svg"));
+        svgRanges.add(new SVGRange(6, 10, -1, "../../building/building-6-10-heal.svg"));
+        svgRanges.add(new SVGRange(11, 15, -1, "../../building/building-11-15-heal.svg"));
+        svgRanges.add(new SVGRange(16, 20, -1, "../../building/building-16-20-heal.svg"));
+        svgRanges.add(new SVGRange(21, 26, -1, "../../building/building-21-25-heal.svg"));
+        svgRanges.add(new SVGRange(26, 30, -1, "../../building/building-26-30-heal.svg"));
+        svgRanges.add(new SVGRange(31, 35, -1, "../../building/building-31-35-heal.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, -1, "../../building/building-36-40-heal.svg"));
     }
 
     private void setClassFlowPane() {
@@ -98,7 +99,7 @@ public class ArchitectController implements Initializable {
         if (currentIndexPackage == 0) {
             Object[] strings = apByClasses.keySet().toArray();
             if (strings.length > 2)
-                currentIndexPackage = lastIndexOfSameSubSeq(strings[0].toString(), strings[1].toString());
+                currentIndexPackage = lastIndexOfSameSubSeq(strings);
         }
         for (Map.Entry<String, List<AntiPatternInstance>> entry : apByClasses.entrySet()) {
             if (!classNames.contains(entry.getKey()))
@@ -218,7 +219,7 @@ public class ArchitectController implements Initializable {
         }
     }
 
-    private void showClassDetails(String s,List<AntiPatternInstance> apByClasses) {
+    protected void showClassDetails(String s, List<AntiPatternInstance> apByClasses) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToHeight(true);
         scrollPane.setFitToWidth(true);
@@ -240,16 +241,26 @@ public class ArchitectController implements Initializable {
             }
             vBoxChild.getChildren().add(new Text(apByClasses.get(i).getLocation().toString()));
         }
-        TitledPane titledPane = new TitledPane();
-        titledPane.setContent(vBoxChild);
-        titledPane.setText(apByClasses.get(apByClasses.size()-1).getApName());
-        vBox.getChildren().add(titledPane);
-        scrollPane.setContent(vBox);
-        stackPane.getChildren().add(scrollPane);
+        if (!vBoxChild.getChildren().isEmpty()) {
+            TitledPane titledPane = new TitledPane();
+            titledPane.setContent(vBoxChild);
+            titledPane.setText(apByClasses.get(apByClasses.size() - 1).getApName());
+            vBox.getChildren().add(titledPane);
+        }
+            scrollPane.setContent(vBox);
+            stackPane.getChildren().add(scrollPane);
 
     }
 
-    private int lastIndexOfSameSubSeq(String s, String s1) {
+    protected int lastIndexOfSameSubSeq(Object[] strings) {
+        String s = strings[0].toString();
+        String s1 = strings[1].toString();
+        for (int i = 1; i < strings.length; i++) {
+            if (s.lastIndexOf('.') != strings[i].toString().lastIndexOf('.')) {
+                s1 = strings[i].toString();
+                break;
+            }
+        }
         int res = 0;
         for (; res < s.length(); res++) {
             if (s.charAt(res) != s1.charAt(res))
@@ -259,7 +270,7 @@ public class ArchitectController implements Initializable {
     }
 
 
-    private void setProjectChoiceDataSet() {
+    protected void setProjectChoiceDataSet() {
         List<CommitVersion> tmpList = new LinkedList<>(commitVersions);
         ObservableList data = FXCollections.observableArrayList();
         while (!tmpList.isEmpty()) {
@@ -274,7 +285,7 @@ public class ArchitectController implements Initializable {
 
     }
 
-    private void handleProjectChange(String newProjectName) {
+    protected void handleProjectChange(String newProjectName) {
         currentIndexPackage = 0;
         for (CommitVersion commitVersion : commitVersions) {
             if (commitVersion.getName().contains(newProjectName)) {
