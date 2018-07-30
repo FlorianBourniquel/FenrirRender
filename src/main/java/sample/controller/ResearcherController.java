@@ -170,7 +170,7 @@ public class ResearcherController implements Initializable, ViewerListener {
         clearNotLinked.setOnAction((event) -> {
             for (javafx.scene.Node node: apActivatedHbox.getChildren()) {
                RadioButton radioButton = ((RadioButton) node);
-               Optional<Edge> optionalEdge = currentGraph.edges().filter(n -> n.getNode1().getId().equals(radioButton.getText()) || n.getNode0().getId().equals(radioButton.getText())).findFirst();
+               Optional<Edge> optionalEdge = currentGraph.edges().filter(n -> n.getNode1().getId().equals(((Text) radioButton.getGraphic()).getText()) || n.getNode0().getId().equals(((Text) radioButton.getGraphic()).getText())).findFirst();
                if (!optionalEdge.isPresent())
                    radioButton.setSelected(false);
             }
@@ -316,9 +316,9 @@ public class ResearcherController implements Initializable, ViewerListener {
                 radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
                     if (!block) {
                         if (isNowSelected) {
-                            addAPToGraph(radioButton.getText());
+                            addAPToGraph(((Text)radioButton.getGraphic()).getText());
                         } else {
-                            removeAPToGraph(radioButton.getText());
+                            removeAPToGraph(((Text)radioButton.getGraphic()).getText());
                         }
                     }
                 });

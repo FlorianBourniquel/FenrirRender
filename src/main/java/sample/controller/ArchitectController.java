@@ -11,6 +11,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
@@ -18,6 +20,7 @@ import sample.model.AntiPatternInstance;
 import sample.model.CommitVersion;
 import sample.utils.SVGRange;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
@@ -93,7 +96,7 @@ public class ArchitectController implements Initializable {
         svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, -1, "../../building/building-36-40-heal.svg"));
     }
 
-    private void setClassFlowPane() {
+    protected void setClassFlowPane() {
         index = (int) commitSlider.getValue();
         Map<String, List<AntiPatternInstance>> apByClasses = currentCommitVersions.get(index).getApByClasses();
         if (currentIndexPackage == 0) {
@@ -115,8 +118,7 @@ public class ArchitectController implements Initializable {
                         isFireHealOrNeutral = 1;
                     else if (currentCommitVersions.get(index - 1).getApByClasses().get(className).size() > currentCommitVersions.get(index).getApByClasses().get(className).size())
                         isFireHealOrNeutral = -1;
-                }
-                else if (!currentCommitVersions.get(index - 1).getApByClasses().containsKey(className))
+                } else if (!currentCommitVersions.get(index - 1).getApByClasses().containsKey(className))
                     isFireHealOrNeutral = 1;
             }
             final int finalIsFireHealOrNeutral = isFireHealOrNeutral;
@@ -160,16 +162,16 @@ public class ArchitectController implements Initializable {
                 vBox.setDisable(true);
             }
 
-            button.setOnAction(event -> showClassDetails(button.getUserData().toString(),currentCommitVersions.get(index).getApByClasses().get(button.getUserData().toString())));
+            button.setOnAction(event -> showClassDetails(button.getUserData().toString(), currentCommitVersions.get(index).getApByClasses().get(button.getUserData().toString())));
 
             setAPHboxDataSet();
 
         }
     }
 
-    private void setAPHboxDataSet() {
+    protected void setAPHboxDataSet() {
         apHBox.getChildren().clear();
-        for (String ap :currentCommitVersions.get(index).getAntiPatterns().keySet()) {
+        for (String ap : currentCommitVersions.get(index).getAntiPatterns().keySet()) {
             RadioButton radioButton = new RadioButton();
             radioButton.setText(ap);
             HBox.setHgrow(radioButton, Priority.ALWAYS);
@@ -177,28 +179,29 @@ public class ArchitectController implements Initializable {
             radioButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             radioButton.setSelected(false);
             radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
-                    if (isNowSelected) {
-                        addAPUnderline(radioButton.getText());
-                    } else {
-                        removeAPUnderline(radioButton.getText());
-                    }
+                if (isNowSelected) {
+                    addAPUnderline(radioButton.getText());
+                } else {
+                    removeAPUnderline(radioButton.getText());
+                }
             });
             apHBox.getChildren().add(radioButton);
         }
     }
 
-    private void removeAPUnderline(String text) {
+    protected void removeAPUnderline(String text) {
         List<String> apSelected = new LinkedList<>();
         for (Node node : apHBox.getChildren()) {
             RadioButton radioButton = (RadioButton) node;
             if (radioButton.isSelected())
                 apSelected.add(radioButton.getText());
         }
-        myLabel: for (Node node : classFlowPane.getChildren()) {
+        myLabel:
+        for (Node node : classFlowPane.getChildren()) {
             VBox vBox = (VBox) node;
             List<AntiPatternInstance> antiPatternInstanceList = currentCommitVersions.get(index).getApByClasses().get(vBox.getChildren().get(0).getUserData().toString());
             if (antiPatternInstanceList != null && antiPatternInstanceList.stream().anyMatch(ap -> ap.getApName().equals(text))) {
-                for (String s: apSelected) {
+                for (String s : apSelected) {
                     if (antiPatternInstanceList.stream().anyMatch(ap -> ap.getApName().equals(s)))
                         continue myLabel;
                 }
@@ -208,7 +211,7 @@ public class ArchitectController implements Initializable {
         }
     }
 
-    private void addAPUnderline(String text) {
+    protected void addAPUnderline(String text) {
         for (Node node : classFlowPane.getChildren()) {
             VBox vBox = (VBox) node;
             List<AntiPatternInstance> antiPatternInstanceList = currentCommitVersions.get(index).getApByClasses().get(vBox.getChildren().get(0).getUserData().toString());
@@ -219,7 +222,7 @@ public class ArchitectController implements Initializable {
         }
     }
 
-    protected void showClassDetails(String s, List<AntiPatternInstance> apByClasses) {
+    protected void showClassDetails(String className, List<AntiPatternInstance> apList) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToHeight(true);
         scrollPane.setFitToWidth(true);
@@ -229,26 +232,84 @@ public class ArchitectController implements Initializable {
         exitButton.setPrefHeight(30);
         exitButton.getStyleClass().add("closebutton");
         exitButton.setOnAction(event -> stackPane.getChildren().remove(scrollPane));
-        vBox.getChildren().add(exitButton);
+
         VBox vBoxChild = new VBox();
-        for (int i = 0; i < apByClasses.size() ; i++) {
-            if (i > 0 && !apByClasses.get(i).getApName().equals(apByClasses.get(i-1).getApName())){
+        for (int i = 0; i < apList.size(); i++) {
+            if (i > 0 && !apList.get(i).getApName().equals(apList.get(i - 1).getApName())) {
                 TitledPane titledPane = new TitledPane();
                 titledPane.setContent(vBoxChild);
-                titledPane.setText(apByClasses.get(i-1).getApName());
+                titledPane.setText(apList.get(i - 1).getApName());
                 vBox.getChildren().add(titledPane);
                 vBoxChild = new VBox();
             }
-            vBoxChild.getChildren().add(new Text(apByClasses.get(i).getLocation().toString()));
+            HBox hBox = new HBox();
+            Text text = new Text(apList.get(i).getLocation().toString());
+            hBox.getChildren().add(text);
+            hBox.setSpacing(5.0);
+            ImageView imageView = null;
+            if (index > 0) {
+                if (currentCommitVersions.get(index - 1).getApByClasses().containsKey(className)) {
+                    if (!currentCommitVersions.get(index - 1).getApByClasses().get(className).contains(apList.get(i)))
+                        imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/fire.png")));
+                } else
+                    imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/fire.png")));
+            }
+
+            if (imageView != null) {
+                imageView.setFitHeight(17);
+                imageView.setFitWidth(17);
+                imageView.setPreserveRatio(true);
+                hBox.getChildren().add(imageView);
+            }
+            vBoxChild.getChildren().add(hBox);
+            vBoxChild.setSpacing(5.0);
         }
+
         if (!vBoxChild.getChildren().isEmpty()) {
             TitledPane titledPane = new TitledPane();
             titledPane.setContent(vBoxChild);
-            titledPane.setText(apByClasses.get(apByClasses.size() - 1).getApName());
+            titledPane.setText(apList.get(apList.size() - 1).getApName());
             vBox.getChildren().add(titledPane);
         }
-            scrollPane.setContent(vBox);
-            stackPane.getChildren().add(scrollPane);
+
+        if (index > 0 && currentCommitVersions.get(index - 1).getApByClasses().containsKey(className)) {
+            myLabel:
+            for (AntiPatternInstance antiPatternInstance : currentCommitVersions.get(index - 1).getApByClasses().get(className)) {
+                if (!apList.contains(antiPatternInstance)) {
+                    HBox hBox = new HBox();
+                    Text text = new Text(antiPatternInstance.getLocation().toString());
+                    hBox.getChildren().add(text);
+                    hBox.setSpacing(5.0);
+                    ImageView imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/heal.png")));
+                    imageView.setFitHeight(17);
+                    imageView.setFitWidth(17);
+                    imageView.setPreserveRatio(true);
+                    hBox.getChildren().add(imageView);
+                    for (int i = 0; i < vBox.getChildren().size(); i++) {
+                        TitledPane titledPane = (TitledPane) vBox.getChildren().get(i);
+                        if (titledPane.getText().equals(antiPatternInstance.getApName())) {
+                            ((VBox) titledPane.getContent()).getChildren().add(hBox);
+                            continue myLabel;
+                        }
+
+                    }
+                    TitledPane titledPane = new TitledPane();
+                    vBoxChild = new VBox();
+                    vBoxChild.getChildren().add(hBox);
+                    titledPane.setContent(vBoxChild);
+                    titledPane.setText(antiPatternInstance.getApName());
+                    vBox.getChildren().add(titledPane);
+                }
+            }
+        }
+        ObservableList<Node> data = FXCollections.observableArrayList(vBox.getChildren());
+        data.sort(Comparator.comparing(t -> ((TitledPane) t).getText()));
+
+        data.add(0, exitButton);
+        vBox.getChildren().clear();
+        vBox.getChildren().addAll(data);
+        scrollPane.setContent(vBox);
+        stackPane.getChildren().add(scrollPane);
 
     }
 

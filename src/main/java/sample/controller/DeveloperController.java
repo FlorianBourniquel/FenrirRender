@@ -9,6 +9,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
@@ -50,6 +52,8 @@ public class DeveloperController extends ArchitectController implements Initiali
     private StackPane stackPane;
 
     private boolean updating = true;
+    private Map<String, List<AntiPatternInstance>> apByClasses1 = new HashMap<>();
+    private Map<String, List<AntiPatternInstance>> apByClasses2 = new HashMap<>();
 
     public DeveloperController(List<CommitVersion> commitVersions) {
         super(commitVersions);
@@ -57,6 +61,7 @@ public class DeveloperController extends ArchitectController implements Initiali
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        commitVersions.sort(Comparator.comparing(CommitVersion::getDate).reversed());
         setSVGRanges();
         setProjectChoiceDataSet();
         setClassFlowPane(choiceBoxFirstCommit.getValue().toString(),choiceBoxSecondCommit.getValue().toString());
@@ -66,8 +71,6 @@ public class DeveloperController extends ArchitectController implements Initiali
     private void setClassFlowPane(String commit1, String commit2) {
         apList.clear();
         apMapByClass.clear();
-        Map<String, List<AntiPatternInstance>> apByClasses1 = new HashMap<>();
-        Map<String, List<AntiPatternInstance>> apByClasses2 = new HashMap<>();
         for (CommitVersion commitVersion:currentCommitVersions) {
             if (commitVersion.getCommit().equals(commit1)) {
                 apByClasses1 = commitVersion.getApByClasses();
@@ -100,7 +103,7 @@ public class DeveloperController extends ArchitectController implements Initiali
         }
         for (Map.Entry<String, List<AntiPatternInstance>> entry : apByClasses2.entrySet()) {
             if (!apMapByClass.containsKey(entry.getKey())) {
-                apMapByClass.put(entry.getKey(),new LinkedList<>());
+                apMapByClass.put(entry.getKey(),apByClasses2.get(entry.getKey()));
             }
         }
 
@@ -120,12 +123,23 @@ public class DeveloperController extends ArchitectController implements Initiali
             }
             final int finalIsFireHealOrNeutral = isFireHealOrNeutral;
 
+            int size = apMapByClass.get(className).size();
+            if (!apByClasses1.containsKey(className))
+                size = 0;
+            else if (!apByClasses2.containsKey(className))
+                size = apMapByClass.get(className).size();
+            else {
+                for (AntiPatternInstance antiPatternInstance : apMapByClass.get(className)) {
+                    if (!apByClasses1.get(className).contains(antiPatternInstance))
+                        size--;
+                }
+            }
+            final int finalSize = size;
             InputStream svgFile = getClass()
                     .getResourceAsStream(svgRanges.stream()
-                            .filter(svgRange -> apMapByClass.containsKey(className)
-                                    && svgRange.isFireHealOrNeutral() == finalIsFireHealOrNeutral
-                                    && svgRange.getMax() >= apMapByClass.get(className).size()
-                                    && svgRange.getMin() <= apMapByClass.get(className).size())
+                            .filter(svgRange -> svgRange.isFireHealOrNeutral() == finalIsFireHealOrNeutral
+                                    && svgRange.getMax() >= finalSize
+                                    && svgRange.getMin() <= finalSize)
                             .findFirst()
                             .orElse(svgRanges.get(0)).getPath());
             SvgLoader loader = new SvgLoader();
@@ -166,7 +180,8 @@ public class DeveloperController extends ArchitectController implements Initiali
         }
     }
 
-    private void setAPHboxDataSet() {
+    @Override
+    protected void setAPHboxDataSet() {
         apHBox.getChildren().clear();
         for (String ap : apList) {
             RadioButton radioButton = new RadioButton();
@@ -186,7 +201,8 @@ public class DeveloperController extends ArchitectController implements Initiali
         }
     }
 
-    private void removeAPUnderline(String text) {
+    @Override
+    protected void removeAPUnderline(String text) {
         List<String> apSelected = new LinkedList<>();
         for (Node node : apHBox.getChildren()) {
             RadioButton radioButton = (RadioButton) node;
@@ -207,7 +223,8 @@ public class DeveloperController extends ArchitectController implements Initiali
         }
     }
 
-    private void addAPUnderline(String text) {
+    @Override
+    protected void addAPUnderline(String text) {
         for (Node node : classFlowPane.getChildren()) {
             VBox vBox = (VBox) node;
             List<AntiPatternInstance> antiPatternInstanceList = apMapByClass.get(vBox.getChildren().get(0).getUserData().toString());
@@ -218,9 +235,7 @@ public class DeveloperController extends ArchitectController implements Initiali
         }
     }
 
-
-
-
+    @Override
     protected void handleProjectChange(String newProjectName) {
         currentIndexPackage = 0;
         ObservableList<String> data = FXCollections.observableArrayList();
@@ -260,6 +275,65 @@ public class DeveloperController extends ArchitectController implements Initiali
             }
 
         });
+
+    }
+
+    @Override
+    protected void showClassDetails(String className, List<AntiPatternInstance> apList) {
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        VBox vBox = new VBox();
+        Button exitButton = new Button();
+        exitButton.setText("X");
+        exitButton.setPrefHeight(30);
+        exitButton.getStyleClass().add("closebutton");
+        exitButton.setOnAction(event -> stackPane.getChildren().remove(scrollPane));
+
+        VBox vBoxChild = new VBox();
+        for (int i = 0; i < apList.size(); i++) {
+            if (i > 0 && !apList.get(i).getApName().equals(apList.get(i - 1).getApName())) {
+                TitledPane titledPane = new TitledPane();
+                titledPane.setContent(vBoxChild);
+                titledPane.setText(apList.get(i - 1).getApName());
+                vBox.getChildren().add(titledPane);
+                vBoxChild = new VBox();
+            }
+            HBox hBox = new HBox();
+            Text text = new Text(apList.get(i).getLocation().toString());
+            hBox.getChildren().add(text);
+            hBox.setSpacing(5.0);
+            ImageView imageView = null;
+
+            if (apByClasses2.containsKey(className)) {
+                if (!apByClasses2.get(className).contains(apList.get(i)))
+                    imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/fire.png")));
+                else if (apByClasses2.get(className).contains(apList.get(i)) && !apByClasses1.get(className).contains(apList.get(i)))
+                    imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/heal.png")));
+            } else
+                imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/fire.png")));
+
+
+            if (imageView != null) {
+                imageView.setFitHeight(17);
+                imageView.setFitWidth(17);
+                imageView.setPreserveRatio(true);
+                hBox.getChildren().add(imageView);
+            }
+            vBoxChild.getChildren().add(hBox);
+            vBoxChild.setSpacing(5.0);
+        }
+
+        if (!vBoxChild.getChildren().isEmpty()) {
+            TitledPane titledPane = new TitledPane();
+            titledPane.setContent(vBoxChild);
+            titledPane.setText(apList.get(apList.size() - 1).getApName());
+            vBox.getChildren().add(titledPane);
+        }
+
+        vBox.getChildren().add(0,exitButton);
+        scrollPane.setContent(vBox);
+        stackPane.getChildren().add(scrollPane);
 
     }
 
