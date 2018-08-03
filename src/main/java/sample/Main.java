@@ -37,7 +37,7 @@ public class Main extends Application {
         gsonBuilder.registerTypeAdapter(Calendar.class, new TimestampDeserializer());
         Gson gsonObj = gsonBuilder.create();
         for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
-            if (!fileEntry.isDirectory()) {
+            if (!fileEntry.isDirectory() && fileEntry.getName().contains(".txt")) {
                 System.out.println(fileEntry.getName());
                 try {
                     br = new BufferedReader(new FileReader(fileEntry.getAbsolutePath()));
