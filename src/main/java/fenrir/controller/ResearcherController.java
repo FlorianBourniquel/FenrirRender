@@ -1,4 +1,4 @@
-package sample.controller;
+package fenrir.controller;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -27,9 +27,9 @@ import org.graphstream.ui.layout.springbox.implementations.LinLog;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 import org.graphstream.ui.view.util.InteractiveElement;
-import sample.model.*;
-import sample.utils.MyPredicate;
-import sample.utils.PairColorRange;
+import fenrir.model.*;
+import fenrir.utils.MyPredicate;
+import fenrir.utils.PairColorRange;
 
 import java.io.BufferedWriter;
 import java.io.File;

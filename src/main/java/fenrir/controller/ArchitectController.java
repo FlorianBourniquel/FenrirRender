@@ -1,10 +1,8 @@
-package sample.controller;
+package fenrir.controller;
 
 import afester.javafx.svg.SvgLoader;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -16,11 +14,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-import sample.model.AntiPatternInstance;
-import sample.model.CommitVersion;
-import sample.utils.SVGRange;
+import fenrir.model.AntiPatternInstance;
+import fenrir.model.CommitVersion;
+import fenrir.utils.SVGRange;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
@@ -97,6 +94,7 @@ public class ArchitectController implements Initializable {
     }
 
     protected void setClassFlowPane() {
+        classNames.clear();
         index = (int) commitSlider.getValue();
         Map<String, List<AntiPatternInstance>> apByClasses = currentCommitVersions.get(index).getApByClasses();
         if (currentIndexPackage == 0) {
@@ -348,6 +346,7 @@ public class ArchitectController implements Initializable {
 
     protected void handleProjectChange(String newProjectName) {
         currentIndexPackage = 0;
+        currentCommitVersions.clear();
         for (CommitVersion commitVersion : commitVersions) {
             if (commitVersion.getName().contains(newProjectName)) {
                 currentCommitVersions.add(commitVersion);
@@ -378,6 +377,7 @@ public class ArchitectController implements Initializable {
                 return 0.0;
             }
         });
+        setClassFlowPane();
     }
 
 

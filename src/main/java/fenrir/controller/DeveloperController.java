@@ -1,4 +1,4 @@
-package sample.controller;
+package fenrir.controller;
 
 import afester.javafx.svg.SvgLoader;
 import javafx.collections.FXCollections;
@@ -13,12 +13,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.util.StringConverter;
-import sample.model.AntiPatternInstance;
-import sample.model.CommitVersion;
-import sample.model.PairAPDataLocation;
-import sample.model.PairAPName;
-import sample.utils.SVGRange;
+import fenrir.model.AntiPatternInstance;
+import fenrir.model.CommitVersion;
 
 import java.io.InputStream;
 import java.net.URL;

@@ -1,4 +1,4 @@
-package sample.utils;
+package fenrir.utils;
 
 public class SVGRange {
 

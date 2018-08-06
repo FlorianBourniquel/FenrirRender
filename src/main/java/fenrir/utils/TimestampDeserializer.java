@@ -1,4 +1,4 @@
-package sample.utils;
+package fenrir.utils;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

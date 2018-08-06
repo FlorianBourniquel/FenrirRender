@@ -1,4 +1,4 @@
-package sample.model;
+package fenrir.model;
 
 public class PairLocationOccurrence {
     private Location location;

@@ -1,4 +1,4 @@
-package sample;
+package fenrir;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,11 +9,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import sample.controller.MainController;
-import sample.controller.ResearcherController;
-import sample.model.AntiPatternInstance;
-import sample.model.CommitVersion;
-import sample.utils.TimestampDeserializer;
+import fenrir.controller.MainController;
+import fenrir.model.CommitVersion;
+import fenrir.utils.TimestampDeserializer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -62,7 +60,7 @@ public class Main extends Application {
         convertJsonfileToObject(selectedDirectory, commitVersions);
         commitVersions.sort(Comparator.comparing(CommitVersion::getDate).reversed());
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("view/main.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
 
         // Create a researcherController instance
         MainController mainController = new MainController(commitVersions);

@@ -1,7 +1,7 @@
-package sample.model;
+package fenrir.model;
 
 import com.google.gson.annotations.SerializedName;
-import sample.utils.MyPredicate;
+import fenrir.utils.MyPredicate;
 
 import java.util.*;
 

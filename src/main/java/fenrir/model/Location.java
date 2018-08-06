@@ -1,4 +1,4 @@
-package sample.model;
+package fenrir.model;
 
 import com.google.gson.annotations.SerializedName;
 

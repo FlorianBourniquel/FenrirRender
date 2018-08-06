@@ -1,4 +1,4 @@
-package sample.model;
+package fenrir.model;
 
 import java.util.Objects;
 

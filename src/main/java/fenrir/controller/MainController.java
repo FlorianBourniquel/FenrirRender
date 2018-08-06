@@ -1,22 +1,17 @@
-package sample.controller;
+package fenrir.controller;
 
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.RadioButton;
 import javafx.stage.Stage;
-import sample.model.CommitVersion;
+import fenrir.model.CommitVersion;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -38,9 +33,9 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        researcherMode.setOnAction(event -> createNewWindows("../view/researcher.fxml"));
-        architectMode.setOnAction(event -> createNewWindows("../view/architect.fxml"));
-        developerMode.setOnAction(event -> createNewWindows("../view/developer.fxml"));
+        researcherMode.setOnAction(event -> createNewWindows("/fxml/researcher.fxml"));
+        architectMode.setOnAction(event -> createNewWindows("/fxml/architect.fxml"));
+        developerMode.setOnAction(event -> createNewWindows("/fxml/developer.fxml"));
     }
 
     private void createNewWindows(String path) {

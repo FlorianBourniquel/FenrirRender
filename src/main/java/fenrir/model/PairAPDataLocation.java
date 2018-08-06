@@ -1,4 +1,4 @@
-package sample.model;
+package fenrir.model;
 
 public class PairAPDataLocation {
     private String name;
