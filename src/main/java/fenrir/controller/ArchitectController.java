@@ -65,32 +65,32 @@ public class ArchitectController implements Initializable {
     }
 
     protected void setSVGRanges() {
-        svgRanges.add(new SVGRange(0, 0, 0, "../../building/building-0-0.svg"));
-        svgRanges.add(new SVGRange(1, 5, 0, "../../building/building-1-5.svg"));
-        svgRanges.add(new SVGRange(6, 10, 0, "../../building/building-6-10.svg"));
-        svgRanges.add(new SVGRange(11, 15, 0, "../../building/building-11-15.svg"));
-        svgRanges.add(new SVGRange(16, 20, 0, "../../building/building-16-20.svg"));
-        svgRanges.add(new SVGRange(21, 25, 0, "../../building/building-21-25.svg"));
-        svgRanges.add(new SVGRange(26, 30, 0, "../../building/building-26-30.svg"));
-        svgRanges.add(new SVGRange(31, 35, 0, "../../building/building-31-35.svg"));
-        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 0, "../../building/building-36-40.svg"));
-        svgRanges.add(new SVGRange(1, 5, 1, "../../building/building-1-5-fire.svg"));
-        svgRanges.add(new SVGRange(6, 10, 1, "../../building/building-6-10-fire.svg"));
-        svgRanges.add(new SVGRange(11, 15, 1, "../../building/building-11-15-fire.svg"));
-        svgRanges.add(new SVGRange(16, 20, 1, "../../building/building-16-20-fire.svg"));
-        svgRanges.add(new SVGRange(21, 26, 1, "../../building/building-21-25-fire.svg"));
-        svgRanges.add(new SVGRange(26, 30, 1, "../../building/building-26-30-fire.svg"));
-        svgRanges.add(new SVGRange(31, 35, 1, "../../building/building-31-35-fire.svg"));
-        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 1, "../../building/building-36-40-fire.svg"));
-        svgRanges.add(new SVGRange(0, 0, -1, "../../building/building-0-0-heal.svg"));
-        svgRanges.add(new SVGRange(1, 5, -1, "../../building/building-1-5-heal.svg"));
-        svgRanges.add(new SVGRange(6, 10, -1, "../../building/building-6-10-heal.svg"));
-        svgRanges.add(new SVGRange(11, 15, -1, "../../building/building-11-15-heal.svg"));
-        svgRanges.add(new SVGRange(16, 20, -1, "../../building/building-16-20-heal.svg"));
-        svgRanges.add(new SVGRange(21, 26, -1, "../../building/building-21-25-heal.svg"));
-        svgRanges.add(new SVGRange(26, 30, -1, "../../building/building-26-30-heal.svg"));
-        svgRanges.add(new SVGRange(31, 35, -1, "../../building/building-31-35-heal.svg"));
-        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, -1, "../../building/building-36-40-heal.svg"));
+        svgRanges.add(new SVGRange(0, 0, 0, "/building/building-0-0.svg"));
+        svgRanges.add(new SVGRange(1, 5, 0, "/building/building-1-5.svg"));
+        svgRanges.add(new SVGRange(6, 10, 0, "/building/building-6-10.svg"));
+        svgRanges.add(new SVGRange(11, 15, 0, "/building/building-11-15.svg"));
+        svgRanges.add(new SVGRange(16, 20, 0, "/building/building-16-20.svg"));
+        svgRanges.add(new SVGRange(21, 25, 0, "/building/building-21-25.svg"));
+        svgRanges.add(new SVGRange(26, 30, 0, "/building/building-26-30.svg"));
+        svgRanges.add(new SVGRange(31, 35, 0, "/building/building-31-35.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 0, "/building/building-36-40.svg"));
+        svgRanges.add(new SVGRange(1, 5, 1, "/building/building-1-5-fire.svg"));
+        svgRanges.add(new SVGRange(6, 10, 1, "/building/building-6-10-fire.svg"));
+        svgRanges.add(new SVGRange(11, 15, 1, "/building/building-11-15-fire.svg"));
+        svgRanges.add(new SVGRange(16, 20, 1, "/building/building-16-20-fire.svg"));
+        svgRanges.add(new SVGRange(21, 26, 1, "/building/building-21-25-fire.svg"));
+        svgRanges.add(new SVGRange(26, 30, 1, "/building/building-26-30-fire.svg"));
+        svgRanges.add(new SVGRange(31, 35, 1, "/building/building-31-35-fire.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, 1, "/building/building-36-40-fire.svg"));
+        svgRanges.add(new SVGRange(0, 0, -1, "/building/building-0-0-heal.svg"));
+        svgRanges.add(new SVGRange(1, 5, -1, "/building/building-1-5-heal.svg"));
+        svgRanges.add(new SVGRange(6, 10, -1, "/building/building-6-10-heal.svg"));
+        svgRanges.add(new SVGRange(11, 15, -1, "/building/building-11-15-heal.svg"));
+        svgRanges.add(new SVGRange(16, 20, -1, "/building/building-16-20-heal.svg"));
+        svgRanges.add(new SVGRange(21, 26, -1, "/building/building-21-25-heal.svg"));
+        svgRanges.add(new SVGRange(26, 30, -1, "/building/building-26-30-heal.svg"));
+        svgRanges.add(new SVGRange(31, 35, -1, "/building/building-31-35-heal.svg"));
+        svgRanges.add(new SVGRange(36, Integer.MAX_VALUE, -1, "/building/building-36-40-heal.svg"));
     }
 
     protected void setClassFlowPane() {
@@ -248,9 +248,9 @@ public class ArchitectController implements Initializable {
             if (index > 0) {
                 if (currentCommitVersions.get(index - 1).getApByClasses().containsKey(className)) {
                     if (!currentCommitVersions.get(index - 1).getApByClasses().get(className).contains(apList.get(i)))
-                        imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/fire.png")));
+                        imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/fire.png")));
                 } else
-                    imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/fire.png")));
+                    imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/fire.png")));
             }
 
             if (imageView != null) {
@@ -278,7 +278,7 @@ public class ArchitectController implements Initializable {
                     Text text = new Text(antiPatternInstance.getLocation().toString());
                     hBox.getChildren().add(text);
                     hBox.setSpacing(5.0);
-                    ImageView imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/heal.png")));
+                    ImageView imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/heal.png")));
                     imageView.setFitHeight(17);
                     imageView.setFitWidth(17);
                     imageView.setPreserveRatio(true);

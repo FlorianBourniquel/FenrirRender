@@ -58,7 +58,7 @@ public class MainController implements Initializable {
             Scene scene = new Scene(root, 1920, 1080);
             stage.setScene(scene);
             if (path.contains("architect") || path.contains("developer"))
-                scene.getStylesheets().add("./StyleSheetArchitectView.css");
+                scene.getStylesheets().add("/StyleSheetArchitectView.css");
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
