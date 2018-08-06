@@ -147,9 +147,9 @@ public class CommitVersion {
                     }
                 }
             }
-        }
-        for (Map.Entry<String, List<AntiPatternInstance>> entry: apByClasses.entrySet()) {
-            entry.getValue().sort(Comparator.comparing(AntiPatternInstance::getApName));
+            for (Map.Entry<String, List<AntiPatternInstance>> entry: apByClasses.entrySet()) {
+                entry.getValue().sort(Comparator.comparing(AntiPatternInstance::getApName));
+            }
         }
         return apByClasses;
     }

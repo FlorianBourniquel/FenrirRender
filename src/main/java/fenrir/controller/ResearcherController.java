@@ -90,6 +90,9 @@ public class ResearcherController implements Initializable, ViewerListener {
     private Button clearNotLinked;
 
     @FXML
+    private Button clearAll;
+
+    @FXML
     private Button exportAllButton;
 
     @FXML
@@ -173,6 +176,12 @@ public class ResearcherController implements Initializable, ViewerListener {
                Optional<Edge> optionalEdge = currentGraph.edges().filter(n -> n.getNode1().getId().equals(((Text) radioButton.getGraphic()).getText()) || n.getNode0().getId().equals(((Text) radioButton.getGraphic()).getText())).findFirst();
                if (!optionalEdge.isPresent())
                    radioButton.setSelected(false);
+            }
+        });
+        clearAll.setOnAction((event) -> {
+            for (javafx.scene.Node node: apActivatedHbox.getChildren()) {
+                RadioButton radioButton = ((RadioButton) node);
+                radioButton.setSelected(false);
             }
         });
         exportAllButton.setOnAction((event) -> {

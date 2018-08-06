@@ -235,6 +235,7 @@ public class DeveloperController extends ArchitectController implements Initiali
     protected void handleProjectChange(String newProjectName) {
         currentIndexPackage = 0;
         ObservableList<String> data = FXCollections.observableArrayList();
+        currentCommitVersions.clear();
         for (CommitVersion commitVersion : commitVersions) {
             if (commitVersion.getName().contains(newProjectName)) {
                 currentCommitVersions.add(commitVersion);
@@ -244,30 +245,45 @@ public class DeveloperController extends ArchitectController implements Initiali
         choiceBoxFirstCommit.setItems(data);
         choiceBoxFirstCommit.setValue(data.get(0));
         ObservableList<String> data2 = FXCollections.observableArrayList(data);
-        data2.remove(0);
-        choiceBoxSecondCommit.setItems(data2);
+
         if (data2.size() > 1) {
+            data2.remove(0);
+            choiceBoxSecondCommit.setItems(data2);
             choiceBoxSecondCommit.setItems(data2);
             choiceBoxSecondCommit.setValue(data2.get(0));
             data.remove(data2.get(0));
         }
+        else {
+            choiceBoxSecondCommit.setItems(data);
+            choiceBoxSecondCommit.setValue(data.get(0));
+        }
         choiceBoxFirstCommit.getSelectionModel().selectedIndexProperty().addListener((observableValue, number, number2) -> {
             if (updating) {
                 updating = false;
+                if (choiceBoxSecondCommit.getItems().size() > 1) {
                 choiceBoxSecondCommit.getItems().add(choiceBoxFirstCommit.getItems().get(number.intValue()).toString());
                 choiceBoxSecondCommit.getItems().remove(choiceBoxFirstCommit.getItems().get(number2.intValue()).toString());
+                }
                 updating = true;
-                setClassFlowPane(choiceBoxFirstCommit.getItems().get(number2.intValue()).toString(), choiceBoxSecondCommit.getValue().toString());
+                if (number2.intValue() > -1)
+                    setClassFlowPane(choiceBoxFirstCommit.getItems().get(number2.intValue()).toString(), choiceBoxSecondCommit.getValue().toString());
+                else
+                    setClassFlowPane(choiceBoxFirstCommit.getItems().get(number.intValue()).toString(), choiceBoxSecondCommit.getValue().toString());
             }
 
         });
         choiceBoxSecondCommit.getSelectionModel().selectedIndexProperty().addListener((observableValue, number, number2) -> {
             if (updating) {
                 updating = false;
-                choiceBoxFirstCommit.getItems().add(choiceBoxSecondCommit.getItems().get(number.intValue()).toString());
-                choiceBoxFirstCommit.getItems().remove(choiceBoxSecondCommit.getItems().get(number2.intValue()).toString());
+                if (choiceBoxFirstCommit .getItems().size() > 1) {
+                    choiceBoxFirstCommit.getItems().add(choiceBoxSecondCommit.getItems().get(number.intValue()).toString());
+                    choiceBoxFirstCommit.getItems().remove(choiceBoxSecondCommit.getItems().get(number2.intValue()).toString());
+                }
                 updating = true;
-                setClassFlowPane(choiceBoxFirstCommit.getValue().toString(), choiceBoxSecondCommit.getItems().get(number2.intValue()).toString());
+                if (number2.intValue() > -1)
+                    setClassFlowPane(choiceBoxFirstCommit.getValue().toString(), choiceBoxSecondCommit.getItems().get(number2.intValue()).toString());
+                else
+                    setClassFlowPane(choiceBoxFirstCommit.getValue().toString(), choiceBoxSecondCommit.getItems().get(number.intValue()).toString());
             }
 
         });
@@ -303,11 +319,11 @@ public class DeveloperController extends ArchitectController implements Initiali
 
             if (apByClasses2.containsKey(className)) {
                 if (!apByClasses2.get(className).contains(apList.get(i)))
-                    imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/fire.png")));
+                    imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/fire.png")));
                 else if (apByClasses2.get(className).contains(apList.get(i)) && !apByClasses1.get(className).contains(apList.get(i)))
-                    imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/heal.png")));
+                    imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/heal.png")));
             } else
-                imageView = new ImageView(new Image(getClass().getResourceAsStream("../../status/fire.png")));
+                imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/fire.png")));
 
 
             if (imageView != null) {

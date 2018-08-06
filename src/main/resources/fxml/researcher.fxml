@@ -75,6 +75,11 @@
                                     <Font size="10.0" />
                                  </font>
                               </Button>
+                               <Button id="clearAll" fx:id="clearAll" graphicTextGap="2.0" mnemonicParsing="false" text="Clear All">
+                                   <font>
+                                       <Font size="10.0" />
+                                   </font>
+                               </Button>
                               <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vbarPolicy="NEVER" HBox.hgrow="ALWAYS">
                                  <content>
                                     <HBox id="apActivatedHbox" fx:id="apActivatedHbox" alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" />
