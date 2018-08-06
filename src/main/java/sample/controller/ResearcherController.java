@@ -304,7 +304,7 @@ public class ResearcherController implements Initializable, ViewerListener {
         List<RadioButton> radioButtonList = new LinkedList<>();
         for (CommitVersion commitVersion : currentCommitVersionList) {
             for (Map.Entry<String, List<AntiPatternInstance>> entry : commitVersion.getAntiPatterns().entrySet()) {
-                Optional<RadioButton> matchingObject = radioButtonList.stream().filter(p -> p.getText().equals(entry.getKey())).findFirst();
+                Optional<RadioButton> matchingObject = radioButtonList.stream().filter(p -> ((Text) p.getGraphic()).getText().equals(entry.getKey())).findFirst();
                 if (matchingObject.isPresent())
                     continue;
                 RadioButton radioButton = new RadioButton();
