@@ -23,6 +23,8 @@ public class CommitVersion {
 
     private Map<String, List<AntiPatternInstance>> apByClasses = null;
 
+    private Map<String, List<AntiPatternInstance>> apByPackages = null;
+
     public CommitVersion(String name, String commit, long date, Map<String, List<AntiPatternInstance>> antiPatterns) {
         this.name = name;
         this.commit = commit;
@@ -154,4 +156,25 @@ public class CommitVersion {
         return apByClasses;
     }
 
+    public Map<String, List<AntiPatternInstance>> getApByPackages() {
+        if (apByPackages == null) {
+            apByPackages = new HashMap<>();
+            for (Map.Entry<String, List<AntiPatternInstance>> entry : antiPatterns.entrySet()) {
+                for (AntiPatternInstance antiPatternInstance: entry.getValue()) {
+                    antiPatternInstance.setApName(entry.getKey());
+                    if (apByPackages.containsKey(antiPatternInstance.getLocation().getClassLocation().substring(0,antiPatternInstance.getLocation().getClassLocation().lastIndexOf("."))))
+                        apByPackages.get(antiPatternInstance.getLocation().getClassLocation().substring(0,antiPatternInstance.getLocation().getClassLocation().lastIndexOf("."))).add(antiPatternInstance);
+                    else {
+                        List<AntiPatternInstance> list = new LinkedList<>();
+                        list.add(antiPatternInstance);
+                        apByPackages.put(antiPatternInstance.getLocation().getClassLocation().substring(0,antiPatternInstance.getLocation().getClassLocation().lastIndexOf(".")),list);
+                    }
+                }
+            }
+            for (Map.Entry<String, List<AntiPatternInstance>> entry: apByPackages.entrySet()) {
+                entry.getValue().sort(Comparator.comparing(AntiPatternInstance::getApName));
+            }
+        }
+        return apByPackages;
+    }
 }

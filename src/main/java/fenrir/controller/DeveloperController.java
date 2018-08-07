@@ -188,46 +188,12 @@ public class DeveloperController extends ArchitectController implements Initiali
             radioButton.setSelected(false);
             radioButton.selectedProperty().addListener((obs, wasPreviouslySelected, isNowSelected) -> {
                     if (isNowSelected) {
-                        addAPUnderline(radioButton.getText());
+                        addAPUnderline(radioButton.getText(),classFlowPane,apMapByClass);
                     } else {
-                        removeAPUnderline(radioButton.getText());
+                        removeAPUnderline(radioButton.getText(),classFlowPane,apMapByClass);
                     }
             });
             apHBox.getChildren().add(radioButton);
-        }
-    }
-
-    @Override
-    protected void removeAPUnderline(String text) {
-        List<String> apSelected = new LinkedList<>();
-        for (Node node : apHBox.getChildren()) {
-            RadioButton radioButton = (RadioButton) node;
-            if (radioButton.isSelected())
-                apSelected.add(radioButton.getText());
-        }
-        myLabel: for (Node node : classFlowPane.getChildren()) {
-            VBox vBox = (VBox) node;
-            List<AntiPatternInstance> antiPatternInstanceList = apMapByClass.get(vBox.getChildren().get(0).getUserData().toString());
-            if (antiPatternInstanceList != null && antiPatternInstanceList.stream().anyMatch(ap -> ap.getApName().equals(text))) {
-                for (String s: apSelected) {
-                    if (antiPatternInstanceList.stream().anyMatch(ap -> ap.getApName().equals(s)))
-                        continue myLabel;
-                }
-                Button button = (Button) vBox.getChildren().get(0);
-                button.setStyle("-fx-border-color: transparent;");
-            }
-        }
-    }
-
-    @Override
-    protected void addAPUnderline(String text) {
-        for (Node node : classFlowPane.getChildren()) {
-            VBox vBox = (VBox) node;
-            List<AntiPatternInstance> antiPatternInstanceList = apMapByClass.get(vBox.getChildren().get(0).getUserData().toString());
-            if (antiPatternInstanceList != null && antiPatternInstanceList.stream().anyMatch(ap -> ap.getApName().equals(text))) {
-                Button button = (Button) vBox.getChildren().get(0);
-                button.setStyle("-fx-border-width: 5 5 5 5; -fx-border-color: purple;");
-            }
         }
     }
 

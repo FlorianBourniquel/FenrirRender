@@ -6,12 +6,14 @@ public class SVGRange {
     private int max;
     private int isFireHealOrNeutral;
     private String path;
+    private boolean isClass;
 
-    public SVGRange(int min, int max, int isFireHealOrNeutral, String path) {
+    public SVGRange(int min, int max, int isFireHealOrNeutral, String path, boolean isClass) {
         this.min = min;
         this.max = max;
         this.isFireHealOrNeutral = isFireHealOrNeutral;
         this.path = path;
+        this.isClass = isClass;
     }
 
     public int getMin() {
@@ -28,5 +30,9 @@ public class SVGRange {
 
     public int isFireHealOrNeutral() {
         return isFireHealOrNeutral;
+    }
+
+    public boolean isClass() {
+        return isClass;
     }
 }
