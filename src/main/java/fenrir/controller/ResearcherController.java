@@ -108,6 +108,9 @@ public class ResearcherController implements Initializable, ViewerListener {
     private TitledPane commitVersionChoice;
 
     @FXML
+    private TitledPane apActivatedTitledPane;
+
+    @FXML
     private StackPane stackPane;
 
     @FXML
@@ -120,7 +123,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     private FlowPane flowPaneCommitVersions;
 
     @FXML
-    private HBox apActivatedHbox;
+    private FlowPane apActivatedFlowPane;
 
     @FXML
     private Label occurrences;
@@ -155,6 +158,12 @@ public class ResearcherController implements Initializable, ViewerListener {
             else
                 gridPaneLeft.getRowConstraints().get(0).setPercentHeight(3);
         });
+        apActivatedTitledPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue)
+                gridPaneLeft.getRowConstraints().get(2).setPercentHeight(80);
+            else
+                gridPaneLeft.getRowConstraints().get(2).setPercentHeight(3);
+        });
         scopeGroup.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
             if (scopeGroup.getSelectedToggle() != null) {
                 previousScope = String.valueOf(((RadioButton) old_toggle).getText());
@@ -171,7 +180,7 @@ public class ResearcherController implements Initializable, ViewerListener {
             }
         });
         clearNotLinked.setOnAction((event) -> {
-            for (javafx.scene.Node node: apActivatedHbox.getChildren()) {
+            for (javafx.scene.Node node: apActivatedFlowPane.getChildren()) {
                RadioButton radioButton = ((RadioButton) node);
                Optional<Edge> optionalEdge = currentGraph.edges().filter(n -> n.getNode1().getId().equals(((Text) radioButton.getGraphic()).getText()) || n.getNode0().getId().equals(((Text) radioButton.getGraphic()).getText())).findFirst();
                if (!optionalEdge.isPresent())
@@ -179,7 +188,7 @@ public class ResearcherController implements Initializable, ViewerListener {
             }
         });
         clearAll.setOnAction((event) -> {
-            for (javafx.scene.Node node: apActivatedHbox.getChildren()) {
+            for (javafx.scene.Node node: apActivatedFlowPane.getChildren()) {
                 RadioButton radioButton = ((RadioButton) node);
                 radioButton.setSelected(false);
             }
@@ -309,7 +318,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     }
 
     private void setAPActivatedHboxDataSet() {
-        apActivatedHbox.getChildren().clear();
+        apActivatedFlowPane.getChildren().clear();
         List<RadioButton> radioButtonList = new LinkedList<>();
         for (CommitVersion commitVersion : currentCommitVersionList) {
             for (Map.Entry<String, List<AntiPatternInstance>> entry : commitVersion.getAntiPatterns().entrySet()) {
@@ -332,7 +341,7 @@ public class ResearcherController implements Initializable, ViewerListener {
                     }
                 });
                 radioButtonList.add(radioButton);
-                apActivatedHbox.getChildren().add(radioButton);
+                apActivatedFlowPane.getChildren().add(radioButton);
             }
 
 
@@ -412,7 +421,7 @@ public class ResearcherController implements Initializable, ViewerListener {
         if (statusAPSelected.containsKey(allCommitVersionName) && statusAPSelected.get(allCommitVersionName).containsKey(scope)) {
             List<Boolean> booleans = statusAPSelected.get(allCommitVersionName).get(scope);
             for (int i = 0; i < booleans.size(); i++) {
-                ((RadioButton) apActivatedHbox.getChildren().get(i)).setSelected(booleans.get(i));
+                ((RadioButton) apActivatedFlowPane.getChildren().get(i)).setSelected(booleans.get(i));
             }
         }
 
@@ -481,7 +490,7 @@ public class ResearcherController implements Initializable, ViewerListener {
             if (statusAPSelected.get(allCommitVersionName).containsKey(previousScope))
                 statusAPSelected.get(allCommitVersionName).get(previousScope).clear();
             List<Boolean> booleans = new LinkedList<>();
-            for (javafx.scene.Node radioButton : apActivatedHbox.getChildren()) {
+            for (javafx.scene.Node radioButton : apActivatedFlowPane.getChildren()) {
                 booleans.add(((RadioButton) radioButton).isSelected());
             }
             statusAPSelected.get(allCommitVersionName).put(previousScope, booleans);
