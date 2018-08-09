@@ -3,6 +3,13 @@
 ### Requirements  
   
  - Java 8
+ 
+### Compilation & execution
+ 
+    mvn install
+    java -jar target/Fenrir-1.0-SNAPSHOT-jar-with-dependencies.jar
+    
+   
   
 ### Usage  
   

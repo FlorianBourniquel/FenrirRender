@@ -286,7 +286,7 @@ public class DeveloperController extends ArchitectController implements Initiali
             if (apByClasses2.containsKey(className)) {
                 if (!apByClasses2.get(className).contains(apList.get(i)))
                     imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/fire.png")));
-                else if (apByClasses2.get(className).contains(apList.get(i)) && !apByClasses1.get(className).contains(apList.get(i)))
+                else if (apByClasses2.get(className).contains(apList.get(i)) && (!apByClasses1.containsKey(className) || !apByClasses1.get(className).contains(apList.get(i))))
                     imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/heal.png")));
             } else
                 imageView = new ImageView(new Image(getClass().getResourceAsStream("/status/fire.png")));
