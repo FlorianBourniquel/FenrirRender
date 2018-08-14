@@ -7,7 +7,7 @@
 ### Compilation & execution
  
     mvn install
-    java -jar target/Fenrir-1.0-SNAPSHOT-jar-with-dependencies.jar
+    java -jar -Dprism.maxvram=1G -Dprism.order=sw target/Fenrir-1.0-SNAPSHOT-jar-with-dependencies.jar
     
    
   
