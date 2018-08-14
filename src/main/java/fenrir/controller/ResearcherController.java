@@ -1,5 +1,6 @@
 package fenrir.controller;
 
+import fenrir.utils.PairSizeRange;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -126,6 +127,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     private List<Node> selectedNodes = new LinkedList<>();
 
     private Boolean block = false;
+    private List<PairSizeRange> sizeRanges = new LinkedList<>();
 
     public ResearcherController(List<CommitVersion> commitVersions) {
         this.commitVersions = commitVersions;
@@ -133,6 +135,7 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        setSizeRanges();
         legend.managedProperty().bind(legend.visibleProperty());
         classScopeButton.setToggleGroup(scopeGroup);
         functionScopeButton.setToggleGroup(scopeGroup);
@@ -271,6 +274,17 @@ public class ResearcherController implements Initializable, ViewerListener {
         });
     }
 
+    private void setSizeRanges() {
+        sizeRanges.add(new PairSizeRange(0, 0, 0));
+        sizeRanges.add(new PairSizeRange(1, 5, 0.7));
+        sizeRanges.add(new PairSizeRange(6, 10, 1.4));
+        sizeRanges.add(new PairSizeRange(11, 15, 2.1));
+        sizeRanges.add(new PairSizeRange(16, 20, 2.8));
+        sizeRanges.add(new PairSizeRange(21, 25, 3.5));
+        sizeRanges.add(new PairSizeRange(26, 30, 4.2));
+        sizeRanges.add(new PairSizeRange(31, 35, 4.9));
+        sizeRanges.add(new PairSizeRange(36, Integer.MAX_VALUE,5.6));
+    }
     private void switchToColorStyle() {
         for (int i = 0; i < currentGraph.getEdgeCount(); i++) {
             currentGraph.getEdge(i).setAttribute("ui.style", "size: " + 4 + "px;");
@@ -282,7 +296,13 @@ public class ResearcherController implements Initializable, ViewerListener {
     private void switchToThicknessStyle() {
         for (int i = 0; i < currentGraph.getEdgeCount(); i++) {
             currentGraph.getEdge(i).setAttribute("ui.style", "fill-color: black;");
-            currentGraph.getEdge(i).setAttribute("ui.style", currentGraph.getEdge(i).getAttribute("size"));
+            int finalI = i;
+            double size = sizeRanges.stream()
+                    .filter(sizeRange -> sizeRange.getMax() >= Integer.valueOf(currentGraph.getEdge(finalI).getAttribute("size").toString())
+                            && sizeRange.getMin() <= Integer.valueOf(currentGraph.getEdge(finalI).getAttribute("size").toString()))
+                    .findFirst()
+                    .orElse(sizeRanges.get(0)).getSize();
+            currentGraph.getEdge(i).setAttribute("ui.style", "size: " + size + "px;");
         }
         legend.setVisible(false);
     }
@@ -464,7 +484,7 @@ public class ResearcherController implements Initializable, ViewerListener {
                 for (PairColorRange colorRange : colorRanges) {
                     if (entry.getValue().size() >= colorRange.getMin() && entry.getValue().size() <= colorRange.getMax()) {
                         edge.setAttribute("color", "fill-color: " + colorRange.getColor() + ";");
-                        edge.setAttribute("size", "size: " + entry.getValue().size() + "px;");
+                        edge.setAttribute("size",  entry.getValue().size());
                         break;
                     }
                 }
