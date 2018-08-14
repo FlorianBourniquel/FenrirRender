@@ -2,6 +2,8 @@ package fenrir.controller;
 
 import fenrir.utils.PairSizeRange;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -16,6 +18,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.controlsfx.control.ToggleSwitch;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -66,6 +69,7 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private ToggleGroup styleGroup = new ToggleGroup();
 
+    private boolean isSecondAutoLayout = false;
 
     @FXML
     private Label aPName;
@@ -93,6 +97,10 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     @FXML
     private Button exportLocationButton;
+
+
+    @FXML
+    private HBox styleHBox;
 
     @FXML
     private RadioButton functionScopeButton;
@@ -136,6 +144,12 @@ public class ResearcherController implements Initializable, ViewerListener {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setSizeRanges();
+        ToggleSwitch toggleSwitch = new ToggleSwitch("Second Auto Layout");
+        toggleSwitch.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            isSecondAutoLayout = newValue;
+            createGraphForCommitVersion();
+        });
+        styleHBox.getChildren().add(toggleSwitch);
         legend.managedProperty().bind(legend.visibleProperty());
         classScopeButton.setToggleGroup(scopeGroup);
         functionScopeButton.setToggleGroup(scopeGroup);
@@ -417,7 +431,10 @@ public class ResearcherController implements Initializable, ViewerListener {
         currentGraph.setAttribute("ui.antialias");
         currentGraph.setAttribute("ui.quality");
         FxViewer viewer = new FxViewer(currentGraph, FxViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
-        viewer.enableAutoLayout(new LinLog());
+        if (isSecondAutoLayout)
+            viewer.enableAutoLayout();
+        else
+            viewer.enableAutoLayout(new LinLog());
 
         List<String> nodeAlreadyCreated = new LinkedList<>();
         for (CommitVersion commitVersion : currentCommitVersionList) {

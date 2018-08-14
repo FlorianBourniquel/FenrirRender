@@ -94,7 +94,7 @@
                            </children>
                         </FlowPane>
                         <Label text="Style :" GridPane.rowIndex="1" />
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <HBox id="styleHBox" fx:id="styleHBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                            <children>
                               <RadioButton id="colorStyleButton" fx:id="colorStyleButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Color" HBox.hgrow="ALWAYS" />
                               <RadioButton id="thicknessStyleButton" fx:id="thicknessStyleButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Line thickness" HBox.hgrow="ALWAYS" />
