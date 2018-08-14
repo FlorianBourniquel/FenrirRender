@@ -53,10 +53,6 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private Map<PairAPName, Map<String, List<PairAPDataLocation>>> apOccurrence;
 
-    private Map<String, Map<String, Integer>> apLocationAndOccurrences = new HashMap<>();
-
-    private Map<String, Map<String, List<Boolean>>> statusAPSelected = new HashMap<>();
-
     private Map<String, Map<String, Map<PairAPName, Map<String, List<PairAPDataLocation>>>>> occurrenceAlreadyCalculated = new HashMap<>();
 
     private Map<String, MyPredicate> predicateMap = new HashMap<>();
@@ -69,7 +65,6 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private ToggleGroup styleGroup = new ToggleGroup();
 
-    private String previousScope = "Class";
 
     @FXML
     private Label aPName;
@@ -166,7 +161,6 @@ public class ResearcherController implements Initializable, ViewerListener {
         });
         scopeGroup.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
             if (scopeGroup.getSelectedToggle() != null) {
-                previousScope = String.valueOf(((RadioButton) old_toggle).getText());
                 createGraphForCommitVersion();
             }
         });
@@ -366,7 +360,7 @@ public class ResearcherController implements Initializable, ViewerListener {
     }
 
     private void createGraphForCommitVersion(String... args) {
-        clearCurrentGraphAndSaveStatus();
+        Map<String, Boolean> statusAPSelected = clearCurrentGraphAndSaveStatus();
         currentCommitVersionList.clear();
         for (javafx.scene.Node commitVersionLoop : flowPaneCommitVersions.getChildren()) {
             RadioButton radioButton = (RadioButton) commitVersionLoop;
@@ -418,10 +412,10 @@ public class ResearcherController implements Initializable, ViewerListener {
         setCssToNode();
 
         createEdge(apOccurrence);
-        if (statusAPSelected.containsKey(allCommitVersionName) && statusAPSelected.get(allCommitVersionName).containsKey(scope)) {
-            List<Boolean> booleans = statusAPSelected.get(allCommitVersionName).get(scope);
-            for (int i = 0; i < booleans.size(); i++) {
-                ((RadioButton) apActivatedFlowPane.getChildren().get(i)).setSelected(booleans.get(i));
+        for (javafx.scene.Node node: apActivatedFlowPane.getChildren()) {
+            RadioButton radioButton = ((RadioButton) node);
+            if (statusAPSelected.containsKey(((Text)radioButton.getGraphic()).getText())) {
+                radioButton.setSelected(statusAPSelected.get(((Text)radioButton.getGraphic()).getText()));
             }
         }
 
@@ -483,21 +477,18 @@ public class ResearcherController implements Initializable, ViewerListener {
             switchToThicknessStyle();
     }
 
-    private void clearCurrentGraphAndSaveStatus() {
+    private Map<String, Boolean> clearCurrentGraphAndSaveStatus() {
+        Map<String, Boolean> booleans = new HashMap<>();
         if (currentGraph != null) {
-            if (!statusAPSelected.containsKey(allCommitVersionName))
-                statusAPSelected.put(allCommitVersionName, new HashMap<>());
-            if (statusAPSelected.get(allCommitVersionName).containsKey(previousScope))
-                statusAPSelected.get(allCommitVersionName).get(previousScope).clear();
-            List<Boolean> booleans = new LinkedList<>();
-            for (javafx.scene.Node radioButton : apActivatedFlowPane.getChildren()) {
-                booleans.add(((RadioButton) radioButton).isSelected());
+            for (javafx.scene.Node node : apActivatedFlowPane.getChildren()) {
+                RadioButton radioButton = (RadioButton) node;
+                booleans.put(((Text)radioButton.getGraphic()).getText(), radioButton.isSelected());
             }
-            statusAPSelected.get(allCommitVersionName).put(previousScope, booleans);
             for (Node node : selectedNodes) {
                 unselectNode(node);
             }
         }
+        return booleans;
     }
 
     private void setCommitChoiceDataSet() {
