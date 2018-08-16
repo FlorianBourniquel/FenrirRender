@@ -138,6 +138,7 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private Boolean block = false;
     private List<PairSizeRange> sizeRanges = new LinkedList<>();
+    private boolean isColorMode;
 
     public ResearcherController(List<CommitVersion> commitVersions) {
         this.commitVersions = commitVersions;
@@ -192,10 +193,14 @@ public class ResearcherController implements Initializable, ViewerListener {
         styleGroup.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
             if (styleGroup.getSelectedToggle() != null) {
                 String s = String.valueOf(((RadioButton) new_toggle).getText());
-                if (s.equals("Color"))
+                if (s.equals("Color")) {
                     switchToColorStyle();
-                else
+                    isColorMode = true;
+                }
+                else {
                     switchToThicknessStyle();
+                    isColorMode = false;
+                }
             }
         });
         clearNotLinked.setOnAction((event) -> {
@@ -683,7 +688,7 @@ public class ResearcherController implements Initializable, ViewerListener {
         else
             edge = currentGraph.getEdge(node1.getId() + "-" + node.getId());
         if (edge != null) {
-            edge.setAttribute("ui.style", "fill-color: #372248;");
+            edge.setAttribute("ui.style", "fill-color: #b9a3cc;");
             fillInfo(edge);
         } else
             fillInfo(node1);
@@ -696,7 +701,10 @@ public class ResearcherController implements Initializable, ViewerListener {
         else
             edge = currentGraph.getEdge(node1.getId() + "-" + node.getId());
         if (edge != null) {
-            edge.setAttribute("ui.style", edge.getAttribute("color"));
+            if (isColorMode)
+                edge.setAttribute("ui.style", edge.getAttribute("color"));
+            else
+                edge.setAttribute("ui.style", "fill-color: #000000;");
         }
     }
 }
