@@ -71,6 +71,8 @@ public class ResearcherController implements Initializable, ViewerListener {
 
     private boolean isSecondAutoLayout = false;
 
+    private boolean isAutoLayoutDisabled = false;
+
     @FXML
     private Label aPName;
 
@@ -149,7 +151,13 @@ public class ResearcherController implements Initializable, ViewerListener {
             isSecondAutoLayout = newValue;
             createGraphForCommitVersion();
         });
+        ToggleSwitch toggleSwitch2 = new ToggleSwitch("Disable Auto Layout");
+        toggleSwitch2.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            isAutoLayoutDisabled = newValue;
+            createGraphForCommitVersion();
+        });
         styleHBox.getChildren().add(toggleSwitch);
+        styleHBox.getChildren().add(toggleSwitch2);
         legend.managedProperty().bind(legend.visibleProperty());
         classScopeButton.setToggleGroup(scopeGroup);
         functionScopeButton.setToggleGroup(scopeGroup);
@@ -431,8 +439,11 @@ public class ResearcherController implements Initializable, ViewerListener {
         currentGraph.setAttribute("ui.antialias");
         currentGraph.setAttribute("ui.quality");
         FxViewer viewer = new FxViewer(currentGraph, FxViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
+
         if (isSecondAutoLayout)
             viewer.enableAutoLayout();
+        else if (isAutoLayoutDisabled)
+            viewer.disableAutoLayout();
         else
             viewer.enableAutoLayout(new LinLog());
 
@@ -447,6 +458,12 @@ public class ResearcherController implements Initializable, ViewerListener {
         }
 
         setCssToNode();
+
+        if (isAutoLayoutDisabled)
+            for (int i = 0; i < currentGraph.getNodeCount(); i++) {
+                currentGraph.getNode(i).setAttribute("xyz", 0, 0, 0);
+            }
+
 
         createEdge(apOccurrence);
         for (javafx.scene.Node node: apActivatedFlowPane.getChildren()) {
